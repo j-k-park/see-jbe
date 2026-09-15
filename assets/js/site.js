@@ -260,6 +260,8 @@
     let html = "", list = null;
     const inline = (s) =>
       s
+        .replace(/^\[ \]\s*/, "□ ")
+        .replace(/^\[[xX]\]\s*/, "■ ")
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
         .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|[a-z0-9]+\.html[^\s)]*)\)/g, (m, t, u) => `<a href="${u}"${u.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${t}</a>`);
     const close = () => { if (list) { html += `</${list}>`; list = null; } };
@@ -281,7 +283,7 @@
   function mdToBlocks(src) {
     const blocks = [];
     let cur = null;
-    const strip = (s) => s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+    const strip = (s) => s.replace(/^\[ \]\s*/, "□ ").replace(/^\[[xX]\]\s*/, "■ ").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
     for (const raw of String(src).split(/\r?\n/)) {
       const line = raw.trim();
       let m;

@@ -26,19 +26,27 @@
     if (SEEAuth.user() || devMode) return open();
     gate.hidden = false;
     log.hidden = inputArea.hidden = true;
+    // 로그인하러 다녀오는 동안 질문을 잃지 않도록 보관
+    const pq = new URLSearchParams(location.search).get("q");
+    if (pq) try { sessionStorage.setItem("see.pendingQ", pq); } catch {}
+    if (SEEAuth.inApp) {
+      $("gate-msg").innerHTML = '카카오톡 등 앱 안의 브라우저에서는 구글 로그인이 되지 않아요. <button type="button" class="btn btn-navy btn-sm" id="ext">다른 브라우저로 열기</button><br>또는 오른쪽 위 메뉴에서 "다른 브라우저로 열기"를 눌러 주세요.';
+      $("ext").addEventListener("click", () => SEEAuth.openExternal());
+    }
     if (!cfg.googleClientId) {
       $("gate-msg").textContent = "로그인 설정을 준비하고 있습니다. 잠시 후 다시 이용해 주세요.";
       return;
     }
     const ok = await SEEAuth.renderButton($("gbtn"));
-    if (!ok) $("gate-msg").textContent = "구글 로그인을 불러오지 못했습니다. 브라우저의 팝업·쿠키 차단을 확인해 주세요.";
+    if (!ok && !SEEAuth.inApp) $("gate-msg").textContent = "구글 로그인을 불러오지 못했습니다. 브라우저의 팝업·쿠키 차단을 확인해 주세요.";
   }
 
   function open() {
     gate.hidden = true;
     log.hidden = inputArea.hidden = false;
     renderAll();
-    const q = new URLSearchParams(location.search).get("q");
+    let q = new URLSearchParams(location.search).get("q");
+    try { q = q || sessionStorage.getItem("see.pendingQ"); sessionStorage.removeItem("see.pendingQ"); } catch {}
     if (q) {
       window.history.replaceState(null, "", "chat.html");
       send(q);

@@ -75,7 +75,9 @@
         auto_select: true,
         cancel_on_tap_outside: true,
         context: "signin",
-        ux_mode: "popup",
+        // 팝업을 막는 브라우저가 많아 페이지 이동 방식 사용 → /api/google-callback 이 토큰을 검증해 탭에 저장
+        ux_mode: "redirect",
+        login_uri: location.origin + "/api/google-callback",
         itp_support: true,
       });
       initialized = true;
@@ -83,7 +85,16 @@
     return true;
   }
 
+  // 카카오톡·네이버 등 앱 속 브라우저에서는 구글이 로그인을 막으므로 바깥 브라우저로 연다
+  const ua = navigator.userAgent || "";
+  const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua);
+
   const api = {
+    inApp,
+    openExternal() {
+      if (/KAKAOTALK/i.test(ua)) location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.href);
+      else if (/Android/i.test(ua)) location.href = "intent://" + location.href.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
+    },
     user: () => read(),
     token: () => read()?.token || null,
     config: getConfig,

@@ -1,0 +1,17 @@
+{
+  "name": "see-jbe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SEE 우리 아이 성장 길잡이 — 전북특별자치도교육청 영유아 특수교육 조기지원 웹앱",
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev",
+    "data": "python scripts/build_data.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
+    "@netlify/blobs": "^11.1.0",
+    "@netlify/functions": "^6.0.0",
+    "jose": "^6.2.12"
+  }
+}

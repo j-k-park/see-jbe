@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4단계 선정 절차와 지원 | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="특수교육대상자 선정·배치 절차 6단계와 받을 수 있는 지원 혜택을 학부모 눈높이로 안내합니다.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="step4">
+<div id="site-head"></div>
+<main id="main">
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="현재 위치"><a href="index.html">홈</a><span>›</span><span>4단계 선정 절차·지원</span></nav>
+      <span class="step-badge" style="--c:var(--blue)">STEP 4</span>
+      <h1>무슨 지원을 받을 수 있을까?</h1>
+      <p class="lead">전문가 소견에 따라 특수교육대상자 선정이 필요할 때, 전체 과정과 받을 수 있는 지원을 한눈에 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="eyebrow">선정·배치 절차</span><h2>의심에서 결과 통보까지, 6단계</h2><p>단계를 누르면 자세한 내용이 나옵니다.</p></div>
+        <button class="btn btn-line btn-sm" type="button" id="save-proc"><span data-icon="download"></span>절차 안내 저장</button>
+      </div>
+      <div class="stepper" id="stepper" role="tablist" aria-label="선정 절차 단계"></div>
+      <div class="step-detail" id="step-detail" aria-live="polite"></div>
+      <div class="step-ctl">
+        <button class="btn btn-line btn-sm" type="button" id="prev"><span data-icon="back"></span>이전 단계</button>
+        <button class="btn btn-navy btn-sm" type="button" id="next">다음 단계<span data-icon="arrow"></span></button>
+      </div>
+
+      <div class="notice blue" style="margin-top:24px"><span data-icon="info"></span>
+        <p><strong>결과에 이의가 있을 때</strong> — 선정, 교육지원 내용, 학교 배치, 부당한 차별에 이의가 있으면 해당 특수교육운영위원회에 심사청구를 할 수 있고, 위원회는 30일 이내에 결과를 알려야 합니다. 심사 결과에도 이의가 있으면 통보받은 날부터 90일 이내에 행정심판을 제기할 수 있습니다. <span class="src">(특수교육법 제36조)</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="eyebrow">지원 혜택 총정리</span><h2>특수교육대상자로 선정되면 받을 수 있는 지원</h2><p>지원 여부와 내용은 진단·평가 결과와 특수교육운영위원회 심의로 정해집니다.</p></div>
+        <button class="btn btn-line btn-sm" type="button" id="save-benefit"><span data-icon="download"></span>지원 목록 저장</button>
+      </div>
+      <div class="benefits" id="benefits"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <nav class="step-nav" aria-label="단계 이동" style="margin-top:0">
+        <a href="step3.html"><small>이전 단계</small><b>3. 결과에 따른 다음 단계는?</b></a>
+        <a class="next" href="step5.html"><small>다음 단계</small><b>5. 어디로 가야 할까?</b></a>
+      </nav>
+    </div>
+  </section>
+</main>
+
+<dialog id="save-dlg"></dialog>
+<div id="site-foot"></div>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/procedure.js"></script>
+</body>
+</html>

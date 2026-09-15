@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자주 묻는 질문 | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="진단평가비, 사립유치원 특수학급, 통합학급 프로그램, 선정 절차 등 학부모가 자주 묻는 질문과 답변.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="faq">
+<div id="site-head"></div>
+<main id="main">
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="현재 위치"><a href="index.html">홈</a><span>›</span><span>자주 묻는 질문</span></nav>
+      <h1>자주 묻는 질문</h1>
+      <p class="lead">학부모님들이 많이 궁금해하는 내용을 모았습니다. 여기에 없는 질문은 AI 상담 SEE에게 편하게 물어보세요.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <div class="tabs" role="tablist" aria-label="질문 분류" id="faq-tabs">
+        <button type="button" role="tab" aria-selected="true" data-cat="">전체</button>
+        <button type="button" role="tab" aria-selected="false" data-cat="비용지원">비용 지원</button>
+        <button type="button" role="tab" aria-selected="false" data-cat="기관정보">기관 정보</button>
+        <button type="button" role="tab" aria-selected="false" data-cat="절차">선정 절차</button>
+        <button type="button" role="tab" aria-selected="false" data-cat="교육지원">교육 지원</button>
+      </div>
+      <div class="faq" id="faq"></div>
+      <div class="see-band" style="margin-top:40px">
+        <img src="assets/img/see-concept.jpg" alt="" width="600" height="492">
+        <div><h2>찾는 답이 없나요?</h2><p>SEE에게 물어보면 우리 아이 상황에 맞춰 안내하고, 필요한 기관을 찾아 드려요.</p></div>
+        <a class="btn btn-orange" href="chat.html"><span data-icon="chat"></span>SEE에게 물어보기</a>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="site-foot"></div>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+  (function () {
+    const FAQ = [
+      { cat: "비용지원", q: "진단평가비는 얼마나 지원되나요?", a: ["특수교육대상자 선정과 관련해 영유아 상담 및 진단평가 비용을 지원하고 있습니다. 지원 대상과 금액, 신청 방법은 거주지 교육지원청 특수교육지원센터에서 정확히 안내받으실 수 있습니다.", "특수교육지원센터가 실시하는 진단·평가 자체는 보호자가 의뢰서를 내면 센터가 30일 이내에 시행합니다."], links: [["step5.html?type=center", "특수교육지원센터 연락처"]], pending: true },
+      { cat: "기관정보", q: "왜 우리 동네 사립유치원에는 특수학급이 없나요?", a: ["사립유치원의 특수학급 설치는 여러 현실적인 문제로 인해 현재 전국시도교육감협의회에서 관련 논의가 유보된 상태입니다. 2026년 기준 도내 특수학급이 설치된 유치원 53곳은 모두 공립유치원입니다.", "가까운 곳에 특수학급이 있는 공립유치원을 찾아보시거나, 다니는 유치원에 특수학급이 없다면 특수교육지원센터의 순회교육을 문의해 보세요."], links: [["step5.html?type=kinder", "특수학급 유치원 찾기"]] },
+      { cat: "기관정보", q: "전주에 통합학급 프로그램을 운영하는 유치원은 어디인가요?", a: ["도내 국공립 유치원 및 단설유치원 대부분이 맞춤형 개별화 교육과 통합 프로그램을 운영하고 있습니다. 2026년 기준 전주에는 특수학급이 설치된 유치원이 20곳(31학급) 있습니다.", "'우리 지역 지원 기관 찾기' 메뉴에서 지역을 전주로 골라 확인해 보세요."], links: [["step5.html?type=kinder&region=%EC%A0%84%EC%A3%BC", "전주 특수학급 유치원 보기"]] },
+      { cat: "절차", q: "병원 진단이 없어도 진단·평가를 신청할 수 있나요?", a: ["네. 장애가 있거나 장애가 있다고 의심되면 보호자가 교육장(교육지원청)에게 진단·평가를 의뢰할 수 있습니다. 병원 소견서나 검사 결과지가 있으면 함께 제출해 참고 자료로 활용합니다."], law: "특수교육법 제14조 제3항" },
+      { cat: "절차", q: "진단·평가부터 결과 통보까지 얼마나 걸리나요?", a: ["특수교육지원센터는 진단·평가가 회부된 뒤 30일 이내에 진단·평가를 시행하고, 교육장은 센터의 최종 의견을 받은 때부터 2주일 이내에 선정 여부와 교육지원 내용을 서면으로 알립니다.", "실제 일정은 지역마다 다릅니다. 예를 들어 전주교육지원청은 접수부터 결과 통보까지 약 2개월로 안내합니다."], law: "특수교육법 제16조" },
+      { cat: "절차", q: "특수교육대상자로 선정되면 장애인으로 등록되나요?", a: ["아닙니다. 특수교육대상자 선정은 아이에게 필요한 교육 지원을 정하기 위한 교육청 절차이고, 장애인 등록은 주민센터에서 하는 복지 제도로 서로 별개입니다. 발달지체처럼 장애인 등록이 없어도 특수교육대상자로 선정될 수 있습니다."], law: "특수교육법 제15조" },
+      { cat: "절차", q: "선정 결과나 배치에 동의하지 않으면 어떻게 하나요?", a: ["선정, 교육지원 내용, 학교 배치, 부당한 차별에 이의가 있으면 해당 특수교육운영위원회에 심사청구를 할 수 있습니다. 위원회는 30일 이내에 결과를 알려야 하며, 이 결과에도 이의가 있으면 통보받은 날부터 90일 이내에 행정심판을 제기할 수 있습니다."], law: "특수교육법 제36조" },
+      { cat: "교육지원", q: "선정되면 꼭 특수학급이나 특수학교에 가야 하나요?", a: ["아닙니다. 일반학교의 일반학급(통합학급), 일반학교의 특수학급, 특수학교 중 한 곳에 배치되며, 아이의 장애 정도·능력·보호자 의견을 종합해 거주지에서 가장 가까운 곳에 배치합니다."], law: "특수교육법 제17조" },
+      { cat: "교육지원", q: "만 3세가 안 된 아기도 지원받을 수 있나요?", a: ["네. 만 3세 미만 장애영아 교육은 무상이며, 보호자는 조기교육이 필요하면 교육장에게 교육을 요구할 수 있습니다. 교육장은 진단·평가 결과를 바탕으로 특수학교 유치원 과정, 영아학급, 특수교육지원센터에 배치하거나 가정 등으로 찾아가는 순회교육을 제공할 수 있습니다."], law: "특수교육법 제3조·제18조" },
+      { cat: "비용지원", q: "치료지원은 얼마나, 어떻게 받나요?", a: ["진단·평가 결과 통지서에 치료지원이 명시된 특수교육대상자는 소속 유치원·학교를 통해 신청하면 꿈활짝카드(치료지원 전자카드)로 월 17만원 이내 실비를 지원받을 수 있습니다. 물리·작업·언어치료, 청능·보행훈련, 미술·음악치료 등이 해당됩니다.", "의무교육기관이 아닌 어린이집에 다니는 아동, 보건복지부 발달재활서비스 등 같은 영역의 지원을 이미 받는 경우는 제외됩니다."], src: "전북교육청 특수교육지원센터 치료지원 안내" },
+      { cat: "비용지원", q: "유치원 과정 교육비가 드나요?", a: ["특수교육대상자는 유치원 과정부터 의무교육입니다. 입학금, 수업료, 교과용 도서 대금, 급식비 등이 무상이며, 통학비·현장체험학습비 등도 예산 범위에서 지원될 수 있습니다."], src: "특수교육법 제3조, 전주교육지원청 특수교육지원센터 자주하는 질문" },
+      { cat: "교육지원", q: "어린이집에 다니는데 교육청 지원을 받을 수 있나요?", a: ["어린이집에 다니더라도 특수교육지원센터에 진단·평가를 의뢰하고 상담을 받을 수 있습니다. 다만 교육청 치료지원(꿈활짝카드)은 어린이집 재원 아동은 대상이 아니므로, 발달재활서비스 등 복지 지원은 주민센터에 문의하세요.", "도내 장애아전문·장애아통합 어린이집 목록은 기관 찾기에서 볼 수 있습니다."], links: [["step5.html?type=daycare", "장애아전문·통합 어린이집 보기"]] },
+    ];
+
+    const box = document.getElementById("faq");
+    function render(cat) {
+      box.innerHTML = FAQ.filter((f) => !cat || f.cat === cat).map((f) => `
+        <details>
+          <summary>${SEE.esc(f.q)}</summary>
+          <div class="ans">
+            ${f.a.map((p) => `<p>${SEE.esc(p)}</p>`).join("")}
+            ${f.pending ? '<p><span class="pending">세부 금액 확인 중</span></p>' : ""}
+            ${f.law ? `<p class="src">근거: ${SEE.esc(f.law)}</p>` : ""}${f.src ? `<p class="src">출처: ${SEE.esc(f.src)}</p>` : ""}
+            <div class="acts">
+              ${(f.links || []).map(([h, t]) => `<a class="btn btn-line btn-sm" href="${h}">${SEE.esc(t)}</a>`).join("")}
+              <a class="btn btn-line btn-sm" href="chat.html?q=${encodeURIComponent(f.q)}">${SEE.icon("chat")}SEE에게 더 묻기</a>
+            </div>
+          </div>
+        </details>`).join("");
+    }
+    document.getElementById("faq-tabs").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      document.querySelectorAll("#faq-tabs button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+      render(b.dataset.cat);
+    });
+    render("");
+  })();
+</script>
+</body>
+</html>

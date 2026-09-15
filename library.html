@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자료실 | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="선정 절차 안내, 지원 혜택, 상담 준비 체크리스트, 기관 목록을 PDF·워드·엑셀 파일로 내려받으세요.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="library">
+<div id="site-head"></div>
+<main id="main">
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="현재 위치"><a href="index.html">홈</a><span>›</span><span>자료실</span></nav>
+      <h1>자료실</h1>
+      <p class="lead">필요한 자료를 PDF(인쇄), 워드(.docx), 텍스트, 엑셀용 CSV 파일로 내려받을 수 있습니다. 워드 파일은 한글에서도 열립니다.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <div class="grid g3" id="docs"></div>
+
+      <div class="card" style="margin-top:28px">
+        <h2 style="color:var(--navy);font-size:20px;margin-bottom:8px">공식 신청 서식</h2>
+        <p style="color:var(--ink-2)">진단·평가 의뢰서, 치료지원 신청서, 순회교육 신청서, 심사 청구서 등 공식 서식은 전북특별자치도교육청 특수교육지원센터 누리집에서 내려받을 수 있습니다.</p>
+        <div class="cta-row" style="margin-top:14px">
+          <a class="btn btn-navy btn-sm" href="https://www.jbe.go.kr/special/index.jbe?menuCd=DOM_000001702001000000" target="_blank" rel="noopener"><span data-icon="external"></span>선정·배치 서식</a>
+          <a class="btn btn-line btn-sm" href="https://www.jbe.go.kr/special/index.jbe?menuCd=DOM_000001703002000000" target="_blank" rel="noopener"><span data-icon="external"></span>치료지원 서식</a>
+          <a class="btn btn-line btn-sm" href="https://www.jbe.go.kr/special/index.jbe?menuCd=DOM_000001702002003000" target="_blank" rel="noopener"><span data-icon="external"></span>순회교육 안내</a>
+        </div>
+      </div>
+      <div class="notice blue" style="margin-top:20px"><span data-icon="info"></span><p>AI 상담 SEE에게 "상담 갈 때 물어볼 질문을 정리해 줘"처럼 요청하면 우리 아이 상황에 맞춘 자료를 만들어 같은 방식으로 저장할 수 있습니다.</p></div>
+    </div>
+  </section>
+</main>
+<div id="site-foot"></div>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/procedure.js"></script>
+<script>
+  (function () {
+    const { esc, icon } = SEE;
+    let inst = null;
+    const loadInst = () => inst ? Promise.resolve(inst) : fetch("data/institutions.json").then((r) => r.json()).then((d) => (inst = d.items));
+
+    const CHECK = [
+      { h: "가져갈 것" , ul: ["아이 관찰 기록지 (1단계에서 저장)", "영유아 건강검진 결과지 또는 선별검사 결과", "병·의원 소견서나 치료 기록 (있다면)", "평소 모습을 담은 짧은 영상 (말, 놀이, 걷는 모습 등)", "다니는 유치원·어린이집 선생님 의견 (있다면)"] },
+      { h: "미리 정리해 둘 것", ul: ["가장 걱정되는 점 3가지", "언제부터 그런 모습이 보였는지", "집과 기관에서 다르게 보이는 모습", "아이가 좋아하는 것과 잘하는 것", "지금 받고 있는 치료나 지원"] },
+      { h: "상담 때 물어볼 질문", ul: ["진단·평가는 어떤 과정으로 몇 번 방문하나요?", "결과는 언제, 어떻게 알려 주나요?", "우리 아이가 받을 수 있는 지원은 무엇인가요?", "가까운 특수학급 유치원이나 순회교육이 가능한가요?", "치료지원은 어떻게 신청하나요?", "기다리는 동안 집에서 무엇을 해 주면 좋을까요?"] },
+      { h: "상담 후 적어 둘 것", ul: ["다음에 할 일과 날짜", "담당자 이름과 연락처", "추가로 준비할 서류"] },
+    ];
+
+    const DOCS = [
+      { id: "proc", t: "특수교육대상자 선정·배치 절차 안내", d: "의심·관찰부터 배치 기관 입학까지 6단계와 이의 신청 방법을 정리했습니다.", tag: ["blue", "절차"],
+        build: () => {
+          const b = [];
+          SEE_PROC.forEach((p, i) => b.push({ h: `${i + 1}단계. ${p.t}` }, { p: p.d }, { ul: p.list }, { note: "도움말: " + p.tip + (p.law ? ` (근거: ${p.law})` : "") }));
+          b.push({ h: "결과에 이의가 있을 때" }, { p: "특수교육운영위원회에 심사청구 → 30일 이내 결과 통보 → 이의가 있으면 통보받은 날부터 90일 이내 행정심판 (특수교육법 제36조)" });
+          return b;
+        } },
+      { id: "benefit", t: "특수교육대상자 지원 혜택 총정리", d: "무상·의무교육, 특수학급, 순회교육, 치료지원, 통학·인력 지원 등 12가지 지원을 표로 정리했습니다.", tag: ["teal", "지원"],
+        build: () => [{ table: { head: ["지원", "내용", "근거·문의"], rows: SEE_BENEFITS.map((x) => [x.t, x.d, x.s || "관할 특수교육지원센터 문의"]) } }] },
+      { id: "check", t: "상담 준비 체크리스트", d: "특수교육지원센터나 병원 상담 갈 때 챙길 것과 물어볼 질문을 한 장에 담았습니다.", tag: ["orange", "준비"],
+        build: () => CHECK.map((c) => [{ h: c.h }, { ul: c.ul.map((x) => "□ " + x) }]).flat() },
+      { id: "centers", t: "시·군 특수교육지원센터 연락처", d: "도내 14개 교육지원청 특수교육지원센터의 주소와 대표 전화번호입니다.", tag: ["navy", "연락처"], csv: true,
+        rows: async () => (await loadInst()).filter((i) => i.type === "center").map((i) => [i.region, i.name, i.address, `${i.phone} (${i.phoneLabel})`]),
+        head: ["지역", "기관", "주소", "전화"] },
+      { id: "kinder", t: "2026 특수학급 설치 유치원 현황", d: "도내 특수학급이 설치된 공립유치원 53곳(85학급)의 주소·전화번호입니다.", tag: ["teal", "기관"], csv: true,
+        rows: async () => (await loadInst()).filter((i) => i.type === "kinder").map((i) => [i.region, i.name, i.kinderKind, i.classes + "학급", i.address, i.phone]),
+        head: ["지역", "유치원", "구분", "특수학급", "주소", "전화"] },
+      { id: "special", t: "도내 특수학교 현황", d: "특수학교 11곳의 설치 과정, 주 장애영역, 주소·전화번호입니다.", tag: ["blue", "기관"], csv: true,
+        rows: async () => (await loadInst()).filter((i) => i.type === "special").map((i) => [i.region, i.name, i.founding, i.area, i.courses.join("·"), i.address, i.phone]),
+        head: ["지역", "학교", "설립", "주 장애영역", "과정", "주소", "전화"] },
+      { id: "daycare", t: "장애아전문·통합 어린이집 목록", d: "어린이집 정보공시 기준 도내 장애아전문 10곳, 장애아통합 14곳입니다.", tag: ["coral", "기관"], csv: true,
+        rows: async () => (await loadInst()).filter((i) => i.type === "daycare").map((i) => [i.region, i.name, i.daycareKind === "special" ? "장애아전문" : "장애아통합", i.founding, i.address, i.phone]),
+        head: ["지역", "어린이집", "구분", "설립", "주소", "전화"] },
+      { id: "obs", t: "우리 아이 발달 관찰 기록지", d: "연령별 발달 모습을 체크하고 메모할 수 있는 기록지입니다. 1단계에서 연령을 고른 뒤 저장하세요.", tag: ["coral", "관찰"], href: "step1.html" },
+    ];
+
+    document.getElementById("docs").innerHTML = DOCS.map((d) => `
+      <article class="doc-card">
+        <span class="tag ${d.tag[0]}" style="align-self:flex-start">${d.tag[1]}</span>
+        <h3>${esc(d.t)}</h3><p>${esc(d.d)}</p>
+        <div class="acts">
+          ${d.href ? `<a class="btn btn-navy btn-sm" href="${d.href}">${icon("arrow")}기록지 만들기</a>` : SEE.saveButtons(d.id)}
+          ${d.csv ? `<button class="btn btn-line btn-sm" type="button" data-csv="${d.id}">${icon("download")}CSV</button>` : ""}
+        </div>
+      </article>`).join("");
+
+    const byId = Object.fromEntries(DOCS.map((d) => [d.id, d]));
+    document.getElementById("docs").addEventListener("click", async (e) => {
+      const s = e.target.closest("[data-save]");
+      const c = e.target.closest("[data-csv]");
+      if (s) {
+        const d = byId[s.dataset.doc];
+        const blocks = d.build ? d.build() : [{ table: { head: d.head, rows: await d.rows() } }, { note: "출처: 전북특별자치도교육청 특수교육지원센터, 유치원알리미 정보공시, 각 교육지원청 누리집 (2026년 9월 확인)" }];
+        SEE.saveAs(s.dataset.save, d.t, blocks);
+      }
+      if (c) {
+        const d = byId[c.dataset.csv];
+        SEE.saveCsv(d.t, d.head, await d.rows());
+      }
+    });
+  })();
+</script>
+</body>
+</html>

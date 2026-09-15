@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5단계 지역 기관 찾기 | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="전북 특수학급 설치 유치원, 특수학교, 특수교육지원센터, 장애아전문·통합 어린이집을 지도에서 찾아보세요.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="step5">
+<div id="site-head"></div>
+<main id="main">
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="현재 위치"><a href="index.html">홈</a><span>›</span><span>5단계 기관 찾기</span></nav>
+      <span class="step-badge" style="--c:var(--navy)">STEP 5</span>
+      <h1>어디로 가야 할까?</h1>
+      <p class="lead">우리 아이가 다닐 수 있는 기관과 상담받을 곳을 지도에서 찾아보고, 주소·연락처·지원 내용을 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:32px">
+    <div class="wrap finder">
+      <aside class="filters" aria-label="검색 조건">
+        <fieldset>
+          <legend>기관 유형</legend>
+          <label class="chk"><input type="checkbox" name="type" value="kinder" checked><span class="sw" style="--c:var(--teal)"></span>특수학급 설치 유치원</label>
+          <label class="chk"><input type="checkbox" name="type" value="special" checked><span class="sw" style="--c:var(--blue)"></span>특수학교</label>
+          <label class="chk"><input type="checkbox" name="type" value="center" checked><span class="sw" style="--c:var(--navy)"></span>특수교육지원센터</label>
+          <label class="chk"><input type="checkbox" name="type" value="daycare-special" checked><span class="sw" style="--c:var(--coral)"></span>장애아전문 어린이집</label>
+          <label class="chk"><input type="checkbox" name="type" value="daycare-inclusive"><span class="sw" style="--c:var(--orange)"></span>장애아통합 어린이집</label>
+        </fieldset>
+        <fieldset>
+          <legend><label for="f-region">지역</label></legend>
+          <select id="f-region"><option value="">전북 전체</option></select>
+        </fieldset>
+        <fieldset>
+          <legend>지원 내용</legend>
+          <label class="chk"><input type="checkbox" id="f-preschool">유치원 과정이 있는 곳만</label>
+          <label class="chk"><input type="checkbox" id="f-multi">특수학급 2학급 이상 유치원만</label>
+        </fieldset>
+        <fieldset>
+          <legend><label for="f-q">이름·주소 검색</label></legend>
+          <input type="search" id="f-q" placeholder="예) 효자로, 문정">
+        </fieldset>
+        <p class="result-count" id="count" aria-live="polite"></p>
+        <button class="btn btn-line btn-sm" type="button" id="save-list"><span data-icon="download"></span>검색 결과 저장(엑셀용 CSV)</button>
+        <p class="src">출처: 전북특별자치도교육청 특수교육지원센터 「2026년도 특수학급 현황」·「특수학교 설치 현황」, 유치원알리미 정보공시, 각 교육지원청 누리집 (2026년 9월 확인). 지도: © OpenStreetMap 기여자</p>
+      </aside>
+
+      <div class="map-col">
+        <div id="map" role="region" aria-label="기관 위치 지도"></div>
+        <div class="detail" id="detail" hidden></div>
+        <ul class="inst-list" id="list"></ul>
+      </div>
+    </div>
+
+    <div class="wrap" style="margin-top:28px">
+      <div class="grid g3">
+        <div class="card">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">특수학급이 없는 유치원이라면</h3>
+          <p style="color:var(--ink-2)">지금 다니는 유치원에 특수학급이 없어도 특수교육지원센터의 순회교육을 받을 수 있어요. 관할 센터에 문의하세요.</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">치료지원 기관은 어디서 찾나요?</h3>
+          <p style="color:var(--ink-2)">교육청 치료지원(꿈활짝카드) 가맹 치료기관은 드림스 앱이나 꿈활짝카드 누리집에서 조회할 수 있어요.</p>
+          <p class="src" style="margin-top:6px">출처: 전북교육청 특수교육지원센터 치료지원 안내</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">더 많은 기관 정보</h3>
+          <p style="color:var(--ink-2)">유치원·어린이집의 자세한 공시 정보는 유치원알리미에서, 장애 자녀 양육 정보는 국립특수교육원 '온맘'에서 볼 수 있어요.</p>
+          <div class="cta-row" style="margin-top:10px"><a class="btn btn-line btn-sm" href="https://e-childschoolinfo.moe.go.kr/" target="_blank" rel="noopener">유치원알리미</a><a class="btn btn-line btn-sm" href="https://www.nise.go.kr/onmam/front/main.do" target="_blank" rel="noopener">온맘</a></div>
+        </div>
+      </div>
+      <nav class="step-nav" aria-label="단계 이동">
+        <a href="step4.html"><small>이전 단계</small><b>4. 무슨 지원을 받을 수 있을까?</b></a>
+        <a class="next" href="chat.html"><small>궁금한 점이 남았다면</small><b>AI 상담 SEE에게 묻기</b></a>
+      </nav>
+    </div>
+  </section>
+</main>
+<div id="site-foot"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/finder.js"></script>
+</body>
+</html>

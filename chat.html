@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 상담 SEE | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="영유아 발달과 특수교육 지원에 대해 AI 상담 SEE에게 물어보세요.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="chat">
+<div id="site-head"></div>
+<main id="main">
+  <div class="wrap chat-page">
+    <section class="chat-shell" aria-label="AI 상담 SEE">
+      <div class="chat-top">
+        <span data-see-logo></span>
+        <div><b>AI 상담 SEE</b><small>발달·특수교육 지원 안내 도우미</small></div>
+        <div class="spacer">
+          <button class="btn btn-line btn-sm" type="button" id="save-all" title="대화 전체 저장"><span data-icon="download"></span><span class="t">대화 저장</span></button>
+          <button class="btn btn-line btn-sm" type="button" id="reset" title="새 대화"><span data-icon="trash"></span><span class="t">새 대화</span></button>
+        </div>
+      </div>
+
+      <div class="login-gate" id="gate" hidden>
+        <div class="inner">
+          <img src="assets/img/see-concept.jpg" alt="" width="600" height="492">
+          <h2>로그인하고 SEE와 상담하세요</h2>
+          <p>AI 상담은 구글 계정으로 로그인한 뒤 이용할 수 있어요. 로그인은 과도한 사용을 막기 위한 것으로, 이름과 이메일은 서버에 저장하지 않습니다.</p>
+          <div id="gbtn"></div>
+          <p class="src" id="gate-msg"></p>
+        </div>
+      </div>
+
+      <div class="chat-log" id="log" aria-live="polite" hidden></div>
+
+      <div class="chat-input" id="input-area" hidden>
+        <form id="form">
+          <label class="sr-only" for="q">SEE에게 보낼 질문</label>
+          <textarea id="q" rows="1" maxlength="1000" placeholder="궁금한 점을 입력하세요"></textarea>
+          <button type="submit" aria-label="보내기" data-icon="send"></button>
+        </form>
+        <div class="hint"><span>아이 이름·주민번호·주소 등 개인정보는 입력하지 마세요.</span><span id="remain"></span></div>
+      </div>
+    </section>
+
+    <aside class="chat-aside">
+      <div class="side-card">
+        <h3>이렇게 물어보세요</h3>
+        <button class="q" type="button">진단평가비는 얼마나 지원되나요?</button>
+        <button class="q" type="button">왜 우리 동네 사립유치원에는 특수학급이 없나요?</button>
+        <button class="q" type="button">전주에 통합학급 프로그램을 운영하는 유치원은 어디인가요?</button>
+        <button class="q" type="button">32개월인데 말이 늦어요. 무엇부터 해야 하나요?</button>
+        <button class="q" type="button">특수교육지원센터 상담 갈 때 준비할 것을 체크리스트로 만들어 주세요.</button>
+      </div>
+      <div class="side-card">
+        <h3>SEE가 할 수 있는 일</h3>
+        <ul style="padding-left:18px;color:var(--ink-2);font-size:14px;display:grid;gap:4px">
+          <li>발달·선별검사·선정 절차 안내</li>
+          <li>지역·유형별 기관 찾기</li>
+          <li>체크리스트·안내문 만들어 파일로 저장</li>
+          <li>관련 안내 페이지 연결</li>
+        </ul>
+      </div>
+      <div class="side-card">
+        <h3>꼭 알아 두세요</h3>
+        <p style="color:var(--ink-2);font-size:14px">SEE는 생성형 AI(Anthropic Claude)를 사용합니다. 답변은 참고용이며 의학적 진단이나 공식 결정을 대신하지 않습니다. 정확한 내용은 거주지 특수교육지원센터에 확인하세요. <a href="privacy.html">개인정보 처리 안내</a></p>
+      </div>
+    </aside>
+  </div>
+</main>
+<div id="site-foot"></div>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/chat.js"></script>
+</body>
+</html>

@@ -423,6 +423,9 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
   .gnb ul { flex-direction: column; gap: 0; padding-bottom: 10px; }
   .gnb a { border-bottom: 1px solid var(--line-2); }
   .menu-toggle { display: inline-flex; }
+  .brand .see small, .btn-ai span { display: none; }
+  .btn-ai { padding: 10px 12px; }
+  .brand .see b { white-space: nowrap; }
   .hero-grid { grid-template-columns: minmax(0, 1fr); }
   .hero-visual { min-height: 0; height: 360px; background: #d9e9f4; }
   .hero-visual img { object-fit: contain; object-position: center 30%; }

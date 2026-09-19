@@ -7,6 +7,7 @@ import { getStore } from "@netlify/blobs";
 import type { Config, Context } from "@netlify/functions";
 import { SYSTEM_PROMPT } from "../shared/knowledge.mts";
 import institutions from "../../data/institutions.json";
+import therapy from "../../data/therapy.json";
 
 type Inst = (typeof institutions.items)[number] & Record<string, unknown>;
 
@@ -27,6 +28,20 @@ const TOOLS: Anthropic.Tool[] = [
         types: { type: "array", items: { type: "string", enum: ["kinder", "special", "center", "daycare"] }, description: "찾을 기관 유형. 생략하면 전체" },
         keyword: { type: "string", description: "기관 이름이나 주소 일부(예: 문정, 효자로)" },
         preschool_only: { type: "boolean", description: "유치원 과정(유아)이 있는 곳만" },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "search_therapy_providers",
+    description:
+      "교육청 치료지원(꿈활짝카드) 가맹 치료기관을 검색한다(2026.5.1. 기준 160곳). 언어·놀이·감각통합 등 치료를 어디서 받을 수 있는지, 지역별 치료기관·발달센터 질문에 사용한다. 기관별 제공 영역 정보는 없으므로 영역은 기관에 확인하도록 안내한다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        region: { type: "string", enum: [...REGIONS, "도외"], description: "시·군 이름. 전북 밖은 '도외'. 생략하면 전체" },
+        keyword: { type: "string", description: "기관 이름이나 주소 일부(예: 언어, 감각, 백제대로)" },
+        rehab_only: { type: "boolean", description: "보건복지부 발달재활서비스 지정기관만" },
       },
       additionalProperties: false,
     },
@@ -250,6 +265,28 @@ function runTool(name: string, input: Record<string, unknown>, send: (e: string,
       total: r.total,
       note: r.total ? "화면에 기관 카드(최대 8곳)와 지도 링크가 표시되었습니다. 답변에서 전체 목록을 반복하지 마세요." : "조건에 맞는 기관이 없습니다. 조건을 넓혀 다시 찾거나 관할 특수교육지원센터를 안내하세요.",
       items: shown.map((i) => ({ ...i, type: TYPE_KO[i.type] ?? i.type })),
+    });
+  }
+  if (name === "search_therapy_providers") {
+    send("status", { label: "치료지원 기관을 찾고 있어요…" });
+    const q = input as { region?: string; keyword?: string; rehab_only?: boolean };
+    const items = therapy.items.filter((i) =>
+      (!q.region || (q.region === "도외" ? !i.local : i.local && i.region === q.region)) &&
+      (!q.keyword || `${i.name} ${i.address}`.includes(q.keyword)) &&
+      (!q.rehab_only || i.rehab)
+    );
+    if (items.length) {
+      const filter: Record<string, string> = {};
+      if (q.region && q.region !== "도외") filter.region = q.region;
+      send("therapy", { total: items.length, items: items.slice(0, 8), filter });
+    }
+    return JSON.stringify({
+      total: items.length,
+      asOf: therapy.asOf,
+      note: items.length
+        ? "화면에 기관 카드(최대 8곳)와 전체 목록 링크가 표시되었습니다. 목록을 반복하지 말고, 제공 치료 영역과 꿈활짝카드 결제 가능 여부는 기관에 전화로 확인하도록 안내하세요."
+        : "조건에 맞는 가맹점이 없습니다. 이웃 시·군을 찾아보거나 관할 특수교육지원센터 순회치료 지원을 안내하세요.",
+      items: items.slice(0, 15).map(({ name, region, address, phone, rehab }) => ({ name, region, address, phone, 발달재활지정: rehab })),
     });
   }
   if (name === "create_document") {

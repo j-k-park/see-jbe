@@ -305,6 +305,17 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
 .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; background: var(--c); box-shadow: 0 1px 4px rgba(0,0,0,.35); }
 .pin.center { width: 22px; height: 22px; border-radius: 6px; }
 
+/* 치료지원 가맹점 표 */
+.therapy-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.therapy-bar select, .therapy-bar input[type="search"] { padding: 10px 12px; border: 1px solid #cdd5e1; border-radius: 10px; background: #fff; }
+.therapy-bar input[type="search"] { flex: 1 1 260px; min-width: 0; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+.t-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 640px; }
+.t-table th { background: var(--bg-2); color: var(--navy); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.t-table td { padding: 10px 12px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+.t-table td:first-child, .t-table td:last-child { white-space: nowrap; }
+.t-table a { color: var(--navy); }
+
 /* ---------- 자료실 / FAQ ---------- */
 .doc-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 10px; background: #fff; }
 .doc-card h3 { font-size: 18px; color: var(--navy); }
@@ -459,6 +470,15 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
   .test-card dl, .detail dl { grid-template-columns: minmax(0, 1fr); }
   .test-card dt, .detail dt { margin-top: 4px; }
   .util-links a:nth-child(n+3) { display: none; }
+  .t-table { min-width: 0; }
+  .t-table thead { display: none; }
+  .t-table tr { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 12px 14px; border-bottom: 1px solid var(--line-2); }
+  .t-table td { padding: 0; border: 0; white-space: normal !important; }
+  .t-table td:nth-child(1) { grid-row: 1; color: var(--ink-3); font-size: 13px; }
+  .t-table td:nth-child(2) { grid-row: 1; font-weight: 700; }
+  .t-table td:nth-child(3), .t-table td:nth-child(4) { grid-column: 1 / -1; font-size: 14px; color: var(--ink-2); }
+  .t-table td:nth-child(5):not(:empty)::before { content: "발달재활 지정 "; font-size: 13px; color: var(--ink-3); }
+  .t-table td:nth-child(5) { grid-column: 1 / -1; font-size: 13px; }
   .chat-top .spacer .t { display: none; }
   .chat-top small { display: none; }
   .chat-shell { height: calc(100vh - 150px); min-height: 460px; }

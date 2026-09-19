@@ -89,6 +89,12 @@
       return `<div class="attach"><h4>${icon("map")}찾은 기관 ${a.total}곳${a.total > a.items.length ? ` (상위 ${a.items.length}곳 표시)` : ""}</h4><div class="rows">${rows}</div>
         <div class="acts"><a class="btn btn-line btn-sm" href="step5.html?${new URLSearchParams(a.filter).toString()}">${icon("map")}지도에서 모두 보기</a></div></div>`;
     }
+    if (a.kind === "therapy") {
+      const rows = a.items.map((it) => `<div class="row"><span><b>${esc(it.name)}</b><br>${esc(it.region)}${it.phone ? ` · ${esc(it.phone)}` : ""}${it.rehab ? " · 발달재활 지정" : ""}<br><span class="src">${esc(it.address)}</span></span><a href="https://map.kakao.com/?q=${encodeURIComponent(it.name)}" target="_blank" rel="noopener">지도</a></div>`).join("");
+      const qs = new URLSearchParams(a.filter || {}).toString();
+      return `<div class="attach"><h4>${icon("stetho")}치료지원 가맹점 ${a.total}곳${a.total > a.items.length ? ` (상위 ${a.items.length}곳 표시)` : ""}</h4><div class="rows">${rows}</div>
+        <div class="acts"><a class="btn btn-line btn-sm" href="step5.html${qs ? "?" + qs : ""}#therapy">${icon("map")}전체 목록 보기</a></div></div>`;
+    }
     if (a.kind === "document") {
       return `<div class="attach doc" data-doc="${k}"><h4>${icon("file")}${esc(a.title)}</h4>
         <div class="doc-prev">${md(a.markdown)}</div>
@@ -150,6 +156,7 @@
         blocks.push({ h: "SEE 답변" }, ...mdToBlocks(m.content));
         (m.attachments || []).forEach((a) => {
           if (a.kind === "document") blocks.push({ h: a.title }, ...mdToBlocks(a.markdown));
+          if (a.kind === "therapy") blocks.push({ table: { head: ["기관", "지역", "전화", "주소"], rows: a.items.map((i) => [i.name, i.region, i.phone || "", i.address]) } });
           if (a.kind === "institutions") blocks.push({ table: { head: ["기관", "유형", "지역", "전화", "주소"], rows: a.items.map((i) => [i.name, TYPE_NAME[i.type] || "", i.region, i.phone || "", i.address || ""]) } });
         });
       }
@@ -233,6 +240,7 @@
         else if (ev === "status") { const s = $("status"); if (s) s.textContent = data.label || ""; }
         else if (ev === "institutions") ai.attachments.push({ kind: "institutions", ...data });
         else if (ev === "document") ai.attachments.push({ kind: "document", ...data });
+        else if (ev === "therapy") ai.attachments.push({ kind: "therapy", ...data });
         else if (ev === "link") ai.attachments.push({ kind: "link", ...data });
         else if (ev === "usage") $("remain").textContent = `오늘 남은 질문 ${data.remaining}회`;
         else if (ev === "error") { ai.content += (ai.content ? "\n\n" : "") + (data.message || "오류가 발생했습니다."); }

@@ -56,6 +56,112 @@
     return true;
   }
 
+  /* ---------- 답변을 소리로 읽어 주기 ---------- */
+  const synth = window.speechSynthesis;
+  let onDone = null, keepAlive = 0, parts = [], idx = 0, playing = false;
+
+  // 한국어 목소리 중 가장 자연스러운 것을 고른다(기기에 있는 것 우선순위)
+  function pickVoice() {
+    const ko = synth.getVoices().filter((v) => /^ko([-_]|$)/i.test(v.lang));
+    const prefer = [/Google/i, /Yuna/i, /Siri/i, /SunHi|선히/i, /Heami|해미/i, /Nara/i, /Natural|Neural/i];
+    for (const p of prefer) {
+      const hit = ko.find((v) => p.test(v.name));
+      if (hit) return hit;
+    }
+    return ko[0] || null;
+  }
+
+  // 마크다운·기호를 빼고 읽기 좋은 문장으로 다듬는다
+  function toSpeech(md) {
+    return String(md || "")
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+      .replace(/https?:\/\/\S+/g, "링크")
+      .replace(/^#{1,6}\s*/gm, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/^\s*[-*•]\s+/gm, "")
+      .replace(/^\s*\[\s?\]\s*/gm, "")
+      .replace(/[□■▸▪◦]/g, " ")
+      .replace(/(\d{2,4})-(\d{3,4})-(\d{4})/g, "$1에 $2에 $3")  // 전화번호를 또박또박
+      .replace(/·/g, ", ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // 길면 중간에 끊기므로 문장 단위로 잘라 차례로 읽는다
+  function toParts(text) {
+    const out = [];
+    let buf = "";
+    for (const s of text.split(/(?<=[.!?。]|요|니다|세요)\s+/)) {
+      if ((buf + " " + s).trim().length > 150) { if (buf) out.push(buf.trim()); buf = s; }
+      else buf += " " + s;
+    }
+    if (buf.trim()) out.push(buf.trim());
+    return out.filter(Boolean);
+  }
+
+  function stop() {
+    playing = false;
+    parts = [];
+    idx = 0;
+    clearInterval(keepAlive);
+    try { synth.cancel(); } catch {}
+    const cb = onDone;
+    onDone = null;
+    cb && cb();
+  }
+
+  function next() {
+    if (!playing) return;
+    if (idx >= parts.length) { const cb = onDone; playing = false; onDone = null; clearInterval(keepAlive); cb && cb(); return; }
+    const u = new SpeechSynthesisUtterance(parts[idx++]);
+    const v = pickVoice();
+    if (v) u.voice = v;
+    u.lang = "ko-KR";
+    u.rate = 0.98;   // 편안한 속도
+    u.pitch = 1;
+    u.volume = 1;
+    u.onend = next;
+    u.onerror = () => { if (playing) next(); };
+    synth.speak(u);
+  }
+
+  // 아이폰은 이용자가 직접 누른 동작에서만 소리를 낼 수 있어, 보내기를 누를 때 미리 한 번 열어 둔다
+  let unlocked = false;
+  function unlock() {
+    if (unlocked || !synth) return;
+    unlocked = true;
+    try {
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      synth.speak(u);
+    } catch {}
+  }
+
+  function speak(text, done) {
+    if (!synth) return false;
+    stop();
+    const clean = toSpeech(text);
+    if (!clean) return false;
+    parts = toParts(clean);
+    idx = 0;
+    playing = true;
+    onDone = done;
+    // 크롬에서 오래 읽으면 멈추는 문제를 막는다
+    keepAlive = setInterval(() => { if (playing && synth.speaking) { synth.pause(); synth.resume(); } }, 9000);
+    next();
+    return true;
+  }
+
+  if (synth) {
+    synth.getVoices();
+    synth.addEventListener?.("voiceschanged", () => synth.getVoices());
+    window.addEventListener("beforeunload", stop);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && playing) stop(); });
+  }
+
   window.SEE = window.SEE || {};
   window.SEE.voice = { supported: !!SR, attach };
+  window.SEE.speech = { supported: !!synth, speak, stop, unlock, get playing() { return playing; }, voiceName: () => pickVoice()?.name || "" };
 })();

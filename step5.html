@@ -25,6 +25,8 @@
   <section class="section" style="padding-top:32px">
     <div class="wrap finder">
       <aside class="filters" aria-label="검색 조건">
+        <details id="filter-acc" open>
+        <summary>검색 조건 펼치기</summary>
         <fieldset>
           <legend>기관 유형</legend>
           <label class="chk"><input type="checkbox" name="type" value="kinder" checked><span class="sw" style="--c:var(--teal)"></span>특수학급 설치 유치원</label>
@@ -46,6 +48,7 @@
           <legend><label for="f-q">이름·주소 검색</label></legend>
           <input type="search" id="f-q" placeholder="예) 효자로, 문정">
         </fieldset>
+        </details>
         <p class="result-count" id="count" aria-live="polite"></p>
         <button class="btn btn-line btn-sm" type="button" id="save-list"><span data-icon="download"></span>검색 결과 저장(엑셀용 CSV)</button>
         <p class="src">출처: 전북특별자치도교육청 특수교육지원센터 「2026년도 특수학급 현황」·「특수학교 설치 현황」, 유치원알리미 정보공시, 각 교육지원청 누리집 (2026년 9월 확인). 지도: © OpenStreetMap 기여자</p>

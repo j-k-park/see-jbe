@@ -51,6 +51,7 @@ ul, ol { margin: 0; padding: 0; }
 .skip { position: absolute; left: 12px; top: -60px; background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 100; }
 .skip:focus { top: 12px; }
 .wrap { max-width: var(--wrap); margin: 0 auto; padding-inline: var(--gutter); }
+[id] { scroll-margin-top: 120px; } /* 고정 머리글에 제목이 가리지 않게 */
 
 /* ---------- 머리글 ---------- */
 .util { background: var(--navy); color: #dfe7f3; font-size: 13px; }
@@ -278,6 +279,8 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
 /* ---------- 5단계: 기관 찾기 ---------- */
 .finder { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; }
 .filters { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: #fff; display: grid; gap: 16px; align-content: start; }
+.filters details { display: contents; }
+.filters summary { display: none; }
 .filters fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .filters legend { font-weight: 800; color: var(--navy); margin-bottom: 6px; font-size: 15px; }
 .chk { display: flex; align-items: center; gap: 8px; font-size: 15px; }
@@ -332,7 +335,7 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
 
 /* ---------- AI 상담 ---------- */
 .chat-page { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; padding-block: 28px 48px; }
-.chat-shell { border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; display: flex; flex-direction: column; height: min(78vh, 820px); min-height: 520px; overflow: hidden; }
+.chat-shell { border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; display: flex; flex-direction: column; height: min(78dvh, 820px); min-height: 520px; overflow: hidden; }
 .chat-top { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--cream); }
 .chat-top [data-see-logo] svg { width: 44px; height: 36px; display: block; }
 .chat-top [data-see-logo] { flex: none; }
@@ -438,11 +441,25 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
   .btn-ai { padding: 10px 12px; }
   .brand .see b { white-space: nowrap; }
   .hero-grid { grid-template-columns: minmax(0, 1fr); }
-  .hero-visual { min-height: 0; height: 360px; background: #d9e9f4; }
-  .hero-visual img { object-fit: contain; object-position: center 30%; }
+  /* 태블릿·휴대폰에서는 그림 전체가 보이고 설명은 그림 아래에 놓이게 */
+  .hero-visual { min-height: 0; height: auto; background: #d9e9f4; display: flex; flex-direction: column; }
+  .hero-visual img { height: 260px; object-fit: contain; }
+  .hero-visual .cap { position: static; border-radius: 0; background: #fff; }
   .g3, .g4, .benefits, .where, .dev-grid, .result-pick, .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .step-detail { grid-template-columns: minmax(0, 1fr); }
   .stepper .lbl { font-size: 12px; }
+
+  /* 손가락으로 누르기 쉽게 — 휴대폰·태블릿에서 누르는 영역을 넓힌다(권장 44px) */
+  .util .wrap { min-height: 0; padding-block: 2px; }
+  .util-links a, .foot-links a, .util-user a { display: inline-block; padding: 8px 0; }
+  .crumbs { align-items: center; }
+  .crumbs a { display: inline-block; padding: 6px 4px; }
+  .util-user button { padding: 6px 12px; }
+  .btn-sm { min-height: 42px; padding-inline: 16px; }
+  .therapy-bar select, .therapy-bar input[type="search"],
+  .filters select, .filters input[type="search"] { min-height: 44px; }
+  .chk { padding-block: 4px; }
+  .leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; font-size: 20px; }
 }
 @media (max-width: 640px) {
   :root { --gutter: 16px; }
@@ -458,8 +475,8 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
   .journey a { min-height: 0; }
   .see-band { grid-template-columns: minmax(0, 1fr); padding: 22px; }
   .see-band img { max-width: 200px; }
-  .hero-visual { height: 330px; }
-  .hero-visual .cap { flex-wrap: wrap; left: 12px; right: 12px; bottom: 12px; }
+  .hero-visual img { height: 220px; }
+  .hero-visual .cap { flex-wrap: wrap; }
   .hero-visual .cap .btn { margin-left: 0; }
   .stepper { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; }
   .stepper button:nth-child(4)::before { display: none; }
@@ -481,5 +498,16 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
   .t-table td:nth-child(5) { grid-column: 1 / -1; font-size: 13px; }
   .chat-top .spacer .t { display: none; }
   .chat-top small { display: none; }
-  .chat-shell { height: calc(100vh - 150px); min-height: 460px; }
+  .chat-shell { height: calc(100dvh - 160px); min-height: 420px; }
+  .chat-input textarea { font-size: 16px; } /* 16px 미만이면 아이폰에서 입력할 때 화면이 확대된다 */
+  .faq summary { padding: 16px; }
+  .stepper .lbl { font-size: 12.5px; }
+  /* 5단계: 작은 화면에서는 검색 조건을 접어 두어 지도·목록이 바로 보이게 */
+  .filters details { display: block; }
+  .filters details[open] { display: grid; gap: 16px; }
+  .filters summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; list-style: none; cursor: pointer; font-weight: 800; color: var(--navy); min-height: 44px; }
+  .filters summary::-webkit-details-marker { display: none; }
+  .filters summary::after { content: "▾"; color: var(--ink-3); }
+  .filters details[open] summary::after { content: "▴"; }
+  .filters details[open] summary { margin-bottom: 4px; }
 }

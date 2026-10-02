@@ -158,6 +158,10 @@
 
   document.querySelectorAll(".filters input, .filters select").forEach((el) => el.addEventListener(el.type === "search" ? "input" : "change", update));
 
+  // 작은 화면에서는 검색 조건을 접어 두고, 조건이 지정된 상태로 들어오면 펼쳐 둔다
+  const acc = $("filter-acc");
+  if (acc && window.matchMedia("(max-width: 640px)").matches && !location.search) acc.open = false;
+
   $("save-list").addEventListener("click", () => {
     const shown = window._seeShown || [];
     SEE.saveCsv(`전북 특수교육 기관 목록 ${SEE.today()}`, ["유형", "기관명", "지역", "주소", "전화", "특수학급 수", "설치 과정", "출처"],

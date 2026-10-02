@@ -69,7 +69,7 @@
       <header class="masthead">
         <div class="wrap masthead-row">
           <a class="brand" href="index.html" aria-label="SEE 우리 아이 성장 길잡이 홈">
-            <img class="jbe" src="assets/img/jbe-logo.png" alt="전북특별자치도교육청" width="560" height="84">
+            <img class="jbe" src="assets/img/jbe-logo.png" alt="전북특별자치도교육청 JEONBUK STATE OFFICE OF EDUCATION" width="640" height="116">
             <span class="bar"></span>
             <span class="see">${SEE_LOGO}<span><b>우리 아이 성장 길잡이</b><small>영유아 특수교육 조기지원</small></span></span>
           </a>
@@ -98,7 +98,7 @@
       <footer class="site-foot"><div class="wrap">
         <div class="foot-grid">
           <div>
-            <img src="assets/img/jbe-logo-white.png" alt="전북특별자치도교육청" width="560" height="84">
+            <img src="assets/img/jbe-logo-white.png" alt="전북특별자치도교육청 JEONBUK STATE OFFICE OF EDUCATION" width="640" height="116">
             <address>(55065) 전북특별자치도 전주시 완산구 홍산로 111 전북특별자치도교육청<br>
             대표전화 063-1396 (평일 9:00~18:00) · 담당 유초등특수교육과</address>
           </div>

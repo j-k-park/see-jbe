@@ -298,6 +298,12 @@
     if (ok && tip) tip.hidden = false;
     const stip = $("speech-tip");
     if (SEE.speech?.supported && stip) stip.hidden = false;
+    const cue = $("voice-cue");
+    if (ok && cue) {
+      cue.hidden = false; // 아이콘은 site.js가 이미 채워 둔다
+      cue.addEventListener("click", () => $("mic")?.click());
+      cue.style.cursor = "pointer";
+    }
   })();
 
   boot();

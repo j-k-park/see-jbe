@@ -34,8 +34,10 @@
       };
       rec.onerror = (e) => {
         setState(false);
-        if (e.error === "not-allowed" || e.error === "service-not-allowed") SEE.toast("마이크 사용을 허용해 주세요. 주소창 옆 자물쇠에서 바꿀 수 있어요.");
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") showMicHelp();
         else if (e.error === "no-speech") SEE.toast("소리가 들리지 않았어요. 다시 눌러 말씀해 주세요.");
+        else if (e.error === "audio-capture") SEE.toast("마이크를 찾지 못했어요. 다른 앱이 마이크를 쓰고 있는지 확인해 주세요.");
+        else if (e.error === "network") SEE.toast("인터넷 연결이 끊겨 음성 인식을 못 했어요.");
         else if (e.error !== "aborted") SEE.toast("음성 인식을 사용할 수 없어요. 글로 입력해 주세요.");
       };
       rec.onend = () => { if (listening) setState(false); };
@@ -54,6 +56,36 @@
     });
     setState(false);
     return true;
+  }
+
+  /* 마이크가 막혔을 때 기기에 맞는 방법을 안내한다 */
+  function showMicHelp() {
+    const ua = navigator.userAgent;
+    const iOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const android = /Android/.test(ua);
+    const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua);
+    let steps;
+    if (inApp) {
+      steps = ["카카오톡·네이버 앱 안의 화면에서는 마이크를 쓸 수 없어요.", "오른쪽 위 메뉴에서 <strong>다른 브라우저로 열기</strong>를 누른 뒤 다시 시도해 주세요."];
+    } else if (iOS) {
+      steps = ["아이폰 <strong>설정</strong> 앱을 엽니다.", "<strong>Safari → 마이크</strong>를 '허용' 또는 '확인'으로 바꿉니다.", "또는 주소창 왼쪽 <strong>'ᴀA'</strong>를 누르고 <strong>웹사이트 설정 → 마이크</strong>에서 허용합니다.", "설정을 바꾼 뒤 이 화면을 새로 고쳐 주세요."];
+    } else if (android) {
+      steps = ["주소창 왼쪽의 <strong>자물쇠나 ⓘ 아이콘</strong>을 누릅니다.", "<strong>권한</strong> 또는 <strong>사이트 설정 → 마이크</strong>를 '허용'으로 바꿉니다.", "휴대폰 <strong>설정 → 앱 → 브라우저 → 권한 → 마이크</strong>도 허용인지 확인해 주세요.", "바꾼 뒤 이 화면을 새로 고쳐 주세요."];
+    } else {
+      steps = ["주소창 왼쪽의 <strong>자물쇠 아이콘</strong>을 누릅니다.", "<strong>마이크</strong>를 '허용'으로 바꿉니다.", "바꾼 뒤 이 화면을 새로 고쳐 주세요."];
+    }
+    const dlg = document.createElement("dialog");
+    dlg.className = "mic-help";
+    dlg.innerHTML = `<div class="dlg-head"><h2>마이크 사용을 허용해 주세요</h2></div>
+      <div class="dlg-body">
+        <ol style="padding-left:20px;display:grid;gap:8px">${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
+        <p class="notice blue" style="margin-top:4px"><span>휴대폰 자판(키보드)에 있는 <strong>마이크 모양 키</strong>를 눌러 말해도 글자가 입력됩니다. 이 방법은 허용 설정 없이 바로 쓸 수 있어요.</span></p>
+      </div>
+      <div class="dlg-foot"><button class="btn btn-navy btn-sm" type="button" value="close">알겠습니다</button></div>`;
+    document.body.appendChild(dlg);
+    dlg.querySelector("[value=close]").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("close", () => dlg.remove());
+    dlg.showModal();
   }
 
   /* ---------- 답변을 소리로 읽어 주기 ---------- */
@@ -89,19 +121,31 @@
       .trim();
   }
 
-  // 길면 중간에 끊기므로 문장 단위로 잘라 차례로 읽는다
+  // 길면 중간에 끊기므로 짧은 문장 단위로 나눈다
   function toParts(text) {
     const out = [];
     let buf = "";
-    for (const s of text.split(/(?<=[.!?。]|요|니다|세요)\s+/)) {
-      if ((buf + " " + s).trim().length > 150) { if (buf) out.push(buf.trim()); buf = s; }
-      else buf += " " + s;
+    const push = (s) => { const t = s.trim(); if (t) out.push(t); };
+    for (const s of text.split(/(?<=[.!?。])\s+|(?<=(?:요|다|죠|까)\.)\s+|\n+/)) {
+      let piece = (s || "").trim();
+      if (!piece) continue;
+      while (piece.length > 110) {            // 너무 긴 문장은 쉼표에서 한 번 더 자른다
+        let cut = piece.lastIndexOf(", ", 110);
+        if (cut < 40) cut = piece.lastIndexOf(" ", 110);
+        if (cut < 40) cut = 110;
+        push(buf); buf = "";
+        push(piece.slice(0, cut + 1));
+        piece = piece.slice(cut + 1).trim();
+      }
+      if ((buf + " " + piece).trim().length > 110) { push(buf); buf = piece; }
+      else buf += " " + piece;
     }
-    if (buf.trim()) out.push(buf.trim());
-    return out.filter(Boolean);
+    push(buf);
+    return out;
   }
 
   function stop() {
+    const was = playing;
     playing = false;
     parts = [];
     idx = 0;
@@ -109,22 +153,30 @@
     try { synth.cancel(); } catch {}
     const cb = onDone;
     onDone = null;
-    cb && cb();
+    if (was) cb && cb();
   }
 
-  function next() {
-    if (!playing) return;
-    if (idx >= parts.length) { const cb = onDone; playing = false; onDone = null; clearInterval(keepAlive); cb && cb(); return; }
-    const u = new SpeechSynthesisUtterance(parts[idx++]);
+  function speakPart(i) {
+    const u = new SpeechSynthesisUtterance(parts[i]);
     const v = pickVoice();
     if (v) u.voice = v;
     u.lang = "ko-KR";
     u.rate = 0.98;   // 편안한 속도
     u.pitch = 1;
     u.volume = 1;
-    u.onend = next;
-    u.onerror = () => { if (playing) next(); };
+    u.onstart = () => { idx = i; };
+    u.onend = () => { if (playing && i === parts.length - 1) finish(); };
+    u.onerror = (e) => { if (playing && e.error !== "interrupted" && e.error !== "canceled" && i === parts.length - 1) finish(); };
     synth.speak(u);
+  }
+
+  function finish() {
+    const cb = onDone;
+    playing = false;
+    parts = [];
+    onDone = null;
+    clearInterval(keepAlive);
+    cb && cb();
   }
 
   // 아이폰은 이용자가 직접 누른 동작에서만 소리를 낼 수 있어, 보내기를 누를 때 미리 한 번 열어 둔다
@@ -145,12 +197,29 @@
     const clean = toSpeech(text);
     if (!clean) return false;
     parts = toParts(clean);
+    if (!parts.length) return false;
     idx = 0;
     playing = true;
     onDone = done;
-    // 크롬에서 오래 읽으면 멈추는 문제를 막는다
-    keepAlive = setInterval(() => { if (playing && synth.speaking) { synth.pause(); synth.resume(); } }, 9000);
-    next();
+    // cancel() 직후 바로 말하면 첫 문장이 잘리는 기기가 있어 잠깐 뒤에 시작한다
+    setTimeout(() => {
+      if (!playing) return;
+      parts.forEach((_, i) => speakPart(i));
+      // 중간에 조용히 멈추는 기기가 있어, 멈춘 것이 확인되면 남은 문장부터 다시 읽는다
+      let idle = 0;
+      keepAlive = setInterval(() => {
+        if (!playing) return clearInterval(keepAlive);
+        if (synth.speaking || synth.pending) { idle = 0; return; }
+        if (++idle < 2) return;              // 2초 동안 아무 소리도 없으면 멈춘 것으로 본다
+        idle = 0;
+        const rest = parts.slice(idx + 1);
+        if (!rest.length) return finish();
+        parts = rest;
+        idx = 0;
+        try { synth.resume(); } catch {}
+        parts.forEach((_, i) => speakPart(i));
+      }, 1000);
+    }, 120);
     return true;
   }
 

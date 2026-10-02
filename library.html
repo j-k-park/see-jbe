@@ -78,7 +78,7 @@
       { id: "daycare", t: "장애아전문·통합 어린이집 목록", d: "어린이집 정보공시 기준 도내 장애아전문 10곳, 장애아통합 14곳입니다.", tag: ["coral", "기관"], csv: true,
         rows: async () => (await loadInst()).filter((i) => i.type === "daycare").map((i) => [i.region, i.name, i.daycareKind === "special" ? "장애아전문" : "장애아통합", i.founding, i.address, i.phone]),
         head: ["지역", "어린이집", "구분", "설립", "주소", "전화"] },
-      { id: "therapy", t: "치료지원(꿈활짝카드) 가맹점 목록", d: "2026. 5. 1. 기준 치료지원 가맹점 160곳(도내 136곳)의 지역·주소·전화입니다.", tag: ["teal", "치료지원"], csv: true,
+      { id: "therapy", t: "치료지원(꿈활짝카드) 가맹점 목록", d: "2026. 5. 1. 기준 치료지원 가맹점 158곳(도내 134곳)의 지역·주소·전화입니다.", tag: ["teal", "치료지원"], csv: true,
         rows: async () => (await fetch("data/therapy.json").then((r) => r.json())).items.map((i) => [i.region, i.name, i.address, i.phone, i.rehab ? "O" : ""]),
         head: ["지역", "기관명", "주소", "전화", "발달재활서비스 지정"] },
       { id: "obs", t: "우리 아이 발달 관찰 기록지", d: "연령별 발달 모습을 체크하고 메모할 수 있는 기록지입니다. 1단계에서 연령을 고른 뒤 저장하세요.", tag: ["coral", "관찰"], href: "step1.html" },

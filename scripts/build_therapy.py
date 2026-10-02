@@ -83,7 +83,7 @@ def region_of(addr):
 
 
 def main(path):
-    items, seen = [], set()
+    items, seen = [], {}
     for row in read_rows(path):
         name = re.sub(r"\s*\(중복\)\s*$", "", (row.get(2) or "").strip())  # 가맹점번호가 둘인 같은 기관은 한 번만
         if not name or name == "가맹점명" or not (row.get(0) or "").strip().isdigit():
@@ -92,18 +92,26 @@ def main(path):
             continue
         addr = re.sub(r"\s+", " ", (row.get(7) or "").strip())
         region, local = region_of(addr)
-        key = (name, addr)
-        if key in seen:
-            continue
-        seen.add(key)
-        items.append({
+        tel = phone(row.get(10), row.get(9))
+        item = {
             "name": name,
             "region": region,
             "local": local,
             "address": addr.replace("전라북도", "전북특별자치도"),
-            "phone": phone(row.get(10), row.get(9)),
+            "phone": tel,
             "rehab": (row.get(3) or "").strip().upper() == "O",
-        })
+        }
+        # 가맹점 번호가 둘이라 같은 기관이 두 줄로 들어온 경우(이름+전화 또는 이름+지역이 같음)는 한 곳으로 합친다.
+        key = (name, tel) if tel else (name, region)
+        prev = seen.get(key)
+        if prev:
+            if len(item["address"]) > len(prev["address"]):  # 더 자세한 주소를 남긴다
+                prev["address"] = item["address"]
+            prev["rehab"] = prev["rehab"] or item["rehab"]
+            prev["phone"] = prev["phone"] or item["phone"]
+            continue
+        seen[key] = item
+        items.append(item)
     items.sort(key=lambda i: (not i["local"], REGIONS.index(i["region"]) if i["local"] else 99, i["region"], i["name"]))
     counts = {}
     for i in items:

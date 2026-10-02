@@ -39,9 +39,10 @@
         <form id="form">
           <label class="sr-only" for="q">SEE에게 보낼 질문</label>
           <textarea id="q" rows="1" maxlength="1000" placeholder="궁금한 점을 입력하세요"></textarea>
+          <button type="button" class="mic" id="mic" aria-pressed="false" aria-label="음성으로 입력하기"></button>
           <button type="submit" aria-label="보내기" data-icon="send"></button>
         </form>
-        <div class="hint"><span>아이 이름·주민번호·주소 등 개인정보는 입력하지 마세요.</span><span id="remain"></span></div>
+        <div class="hint"><span id="voice-hint">마이크를 누르면 말로 입력할 수 있어요. 개인정보는 입력하지 마세요.</span><span id="remain"></span></div>
       </div>
     </section>
 
@@ -63,6 +64,7 @@
           <li>체크리스트·안내문 만들어 파일로 저장</li>
           <li>관련 안내 페이지 연결</li>
         </ul>
+        <p class="src" id="voice-tip" hidden>타이핑이 어려우시면 입력칸 옆 <strong>마이크 버튼</strong>을 눌러 말씀하세요. 말이 끝나면 마이크를 한 번 더 누르고 보내기를 누르면 됩니다.</p>
       </div>
       <div class="side-card">
         <h3>꼭 알아 두세요</h3>
@@ -74,6 +76,7 @@
 <div id="site-foot"></div>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/voice.js"></script>
 <script src="assets/js/chat.js"></script>
 </body>
 </html>

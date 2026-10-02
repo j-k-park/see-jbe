@@ -248,5 +248,14 @@
     }
   }
 
+  /* 음성 입력 */
+  (function voiceSetup() {
+    const hintEl = $("voice-hint");
+    const defaultHint = hintEl ? hintEl.textContent : "";
+    const ok = SEE.voice?.attach($("mic"), ta, { hint: hintEl, hintText: defaultHint });
+    const tip = $("voice-tip");
+    if (ok && tip) tip.hidden = false;
+  })();
+
   boot();
 })();

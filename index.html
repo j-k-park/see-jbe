@@ -25,6 +25,7 @@
         <form class="ask-box" id="hero-ask" role="search" aria-label="AI 상담 SEE에게 질문하기">
           <label class="sr-only" for="hero-q">궁금한 점을 입력하세요</label>
           <input id="hero-q" name="q" type="text" placeholder="예) 세 돌인데 말이 늦어요. 어디서 상담하나요?" autocomplete="off">
+          <button type="button" class="mic" id="hero-mic" aria-pressed="false" aria-label="음성으로 입력하기"></button>
           <button type="submit" aria-label="SEE에게 질문하기" data-icon="send"></button>
         </form>
         <div class="ask-chips" aria-label="자주 묻는 질문">
@@ -152,8 +153,10 @@
 <div id="site-foot"></div>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/voice.js"></script>
 <script>
   (function () {
+    SEE.voice?.attach(document.getElementById("hero-mic"), document.getElementById("hero-q"));
     const go = (q) => { location.href = "chat.html?q=" + encodeURIComponent(q); };
     document.getElementById("hero-ask").addEventListener("submit", (e) => {
       e.preventDefault();

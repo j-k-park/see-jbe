@@ -1,6 +1,7 @@
 /* AI 상담 SEE — 서버 함수 (POST /api/chat)
    1) 구글 ID 토큰 검증 → 2) 하루 이용 횟수 확인 → 3) Claude 호출(도구 사용 루프) → 4) SSE로 스트리밍
-   API 키는 Netlify 환경변수 ANTHROPIC_API_KEY에만 있고 브라우저로 나가지 않는다. 대화 내용은 저장하지 않는다. */
+   API 키는 Netlify 환경변수(ANTHROPIC_API_KEY, 게이트웨이 사용 시 GATEWAY_API_KEY)에만 있고 브라우저로 나가지 않는다.
+   대화 내용은 저장하지 않는다. 연결 경로는 aiRoutes() 참고 — 게이트웨이를 쓰더라도 실패하면 Anthropic 직접 연결로 되돌아간다. */
 import Anthropic from "@anthropic-ai/sdk";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { getStore } from "@netlify/blobs";
@@ -174,68 +175,32 @@ export default async (req: Request, context: Context) => {
     console.warn("usage store unavailable", e);
   }
 
-  const apiKey = Netlify.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return json({ message: "AI 연결 설정이 아직 완료되지 않았습니다. 관리자에게 문의해 주세요." }, 503);
-  const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 50_000 });
-  const model = Netlify.env.get("SEE_MODEL") || "claude-haiku-4-5";
+  const routes = aiRoutes();
+  if (!routes.length) return json({ message: "AI 연결 설정이 아직 완료되지 않았습니다. 관리자에게 문의해 주세요." }, 503);
 
-  /* 4) 스트리밍 응답 */
+  /* 4) 스트리밍 응답 — 앞 경로가 실패하면 다음 경로(보통 Anthropic 직접 연결)로 자동 전환 */
   const stream = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
       const send = (event: string, data: unknown) => controller.enqueue(enc.encode(sse(event, data)));
       send("usage", { remaining });
 
-      const messages: Anthropic.MessageParam[] = [...history];
-      let wrote = false;
-      try {
-        for (let turn = 0; turn < MAX_TURNS; turn++) {
-          const last = turn === MAX_TURNS - 1;
-          const s = client.messages.stream({
-            model,
-            max_tokens: 2048,
-            system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-            tools: TOOLS,
-            tool_choice: last ? { type: "none" } : { type: "auto" },
-            messages,
-          });
-          let sep = wrote;
-          s.on("text", (t) => {
-            if (sep) { send("text", { t: "\n\n" }); sep = false; }
-            wrote = true;
-            send("text", { t });
-          });
-          const msg = await s.finalMessage();
-
-          if (msg.stop_reason === "refusal") {
-            send("text", { t: (wrote ? "\n\n" : "") + "이 질문에는 답변드리기 어려워요. 영유아 발달이나 특수교육 지원에 관해 다시 물어봐 주세요." });
+      for (let r = 0; r < routes.length; r++) {
+        const route = routes[r];
+        const hasBackup = r < routes.length - 1;
+        let wrote = false;
+        try {
+          await runConversation(route, history, send, () => (wrote = true));
+          break;
+        } catch (e) {
+          const message = errorMessage(e, route);
+          if (wrote || !hasBackup) {
+            send("error", { message });
             break;
           }
-          if (msg.stop_reason !== "tool_use") break;
-
-          messages.push({ role: "assistant", content: msg.content });
-          const results: Anthropic.ToolResultBlockParam[] = [];
-          for (const block of msg.content) {
-            if (block.type !== "tool_use") continue;
-            let content: string;
-            try {
-              content = runTool(block.name, block.input as Record<string, unknown>, send);
-            } catch (e) {
-              content = "도구 실행 중 오류가 발생했습니다.";
-              results.push({ type: "tool_result", tool_use_id: block.id, content, is_error: true });
-              continue;
-            }
-            results.push({ type: "tool_result", tool_use_id: block.id, content });
-          }
-          messages.push({ role: "user", content: results });
+          console.warn(`[${route.label}] 실패 → ${routes[r + 1].label}(으)로 전환`, e instanceof Anthropic.APIError ? `${e.status} ${e.message}` : e);
+          send("status", { label: "다른 연결로 다시 시도하고 있어요…" });
         }
-      } catch (e) {
-        let message = "SEE가 잠시 응답하지 못했어요. 잠시 후 다시 시도해 주세요.";
-        if (e instanceof Anthropic.RateLimitError) message = "지금 이용자가 많아요. 1분 정도 뒤에 다시 물어봐 주세요.";
-        else if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) message = "AI 연결 설정에 문제가 있어요. 관리자에게 알려 주세요.";
-        else if (e instanceof Anthropic.APIError) console.error("anthropic", e.status, e.message);
-        else console.error(e);
-        send("error", { message });
       }
       send("done", {});
       controller.close();
@@ -246,6 +211,97 @@ export default async (req: Request, context: Context) => {
     headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-cache, no-transform", "x-accel-buffering": "no" },
   });
 };
+
+/* ---------- AI 연결 경로 ----------
+   기본은 Anthropic 직접 연결. GATEWAY_BASE_URL과 GATEWAY_API_KEY를 넣으면 게이트웨이를 먼저 쓰고,
+   게이트웨이가 실패하면(응답 전이라면) 자동으로 Anthropic 직접 연결로 되돌아간다.
+   환경변수를 지우면 즉시 지금처럼 Anthropic만 쓴다. */
+type Route = { label: string; apiKey: string; baseURL?: string; model: string; cache: boolean; toolChoiceNone: boolean };
+
+function aiRoutes(): Route[] {
+  const list: Route[] = [];
+  const gwKey = Netlify.env.get("GATEWAY_API_KEY");
+  const gwUrl = Netlify.env.get("GATEWAY_BASE_URL");
+  if (gwKey && gwUrl && Netlify.env.get("GATEWAY_OFF") !== "true") {
+    list.push({
+      label: "gateway",
+      apiKey: gwKey,
+      baseURL: gwUrl,
+      model: Netlify.env.get("GATEWAY_MODEL") || "claude-haiku-4-5",
+      cache: Netlify.env.get("GATEWAY_PROMPT_CACHE") !== "off", // 캐싱을 못 받는 중계라면 off
+      toolChoiceNone: Netlify.env.get("GATEWAY_TOOL_CHOICE_NONE") !== "off",
+    });
+  }
+  const key = Netlify.env.get("ANTHROPIC_API_KEY");
+  if (key) {
+    list.push({
+      label: "anthropic",
+      apiKey: key,
+      model: Netlify.env.get("SEE_MODEL") || "claude-haiku-4-5",
+      cache: true,
+      toolChoiceNone: true,
+    });
+  }
+  return list;
+}
+
+function errorMessage(e: unknown, route: Route): string {
+  if (e instanceof Anthropic.RateLimitError) return "지금 이용자가 많아요. 1분 정도 뒤에 다시 물어봐 주세요.";
+  if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return "AI 연결 설정에 문제가 있어요. 관리자에게 알려 주세요.";
+  if (e instanceof Anthropic.APIError) console.error(`[${route.label}]`, e.status, e.message);
+  else console.error(`[${route.label}]`, e);
+  return "SEE가 잠시 응답하지 못했어요. 잠시 후 다시 시도해 주세요.";
+}
+
+async function runConversation(
+  route: Route,
+  history: Anthropic.MessageParam[],
+  send: (e: string, d: unknown) => void,
+  markWrote: () => void
+) {
+  const client = new Anthropic({ apiKey: route.apiKey, baseURL: route.baseURL, maxRetries: 1, timeout: 50_000 });
+  const messages: Anthropic.MessageParam[] = [...history];
+  let wrote = false;
+  for (let turn = 0; turn < MAX_TURNS; turn++) {
+    const last = turn === MAX_TURNS - 1;
+    const s = client.messages.stream({
+      model: route.model,
+      max_tokens: 2048,
+      system: [{ type: "text", text: SYSTEM_PROMPT, ...(route.cache ? { cache_control: { type: "ephemeral" as const } } : {}) }],
+      tools: TOOLS,
+      ...(last && route.toolChoiceNone ? { tool_choice: { type: "none" as const } } : turn === 0 ? {} : { tool_choice: { type: "auto" as const } }),
+      messages,
+    });
+    let sep = wrote;
+    s.on("text", (t) => {
+      if (sep) { send("text", { t: "\n\n" }); sep = false; }
+      wrote = true;
+      markWrote();
+      send("text", { t });
+    });
+    const msg = await s.finalMessage();
+
+    if (msg.stop_reason === "refusal") {
+      send("text", { t: (wrote ? "\n\n" : "") + "이 질문에는 답변드리기 어려워요. 영유아 발달이나 특수교육 지원에 관해 다시 물어봐 주세요." });
+      markWrote();
+      return;
+    }
+    if (msg.stop_reason !== "tool_use") break; // 답변이 비어 있으면 아래에서 오류로 보고 다음 경로로 넘어간다
+
+    messages.push({ role: "assistant", content: msg.content });
+    const results: Anthropic.ToolResultBlockParam[] = [];
+    for (const block of msg.content) {
+      if (block.type !== "tool_use") continue;
+      try {
+        results.push({ type: "tool_result", tool_use_id: block.id, content: runTool(block.name, block.input as Record<string, unknown>, send) });
+      } catch {
+        results.push({ type: "tool_result", tool_use_id: block.id, content: "도구 실행 중 오류가 발생했습니다.", is_error: true });
+      }
+    }
+    messages.push({ role: "user", content: results });
+  }
+  if (!wrote) throw new Error("답변 텍스트가 오지 않았습니다.");
+}
 
 function runTool(name: string, input: Record<string, unknown>, send: (e: string, d: unknown) => void): string {
   if (name === "search_institutions") {

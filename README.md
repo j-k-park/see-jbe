@@ -17,6 +17,12 @@
 | `ANTHROPIC_API_KEY` | Anthropic API 키 (비밀값, 코드·저장소에 넣지 않음) |
 | `GOOGLE_CLIENT_ID` | 구글 OAuth 웹 클라이언트 ID (공개값) |
 | `SEE_MODEL` | 사용할 모델, 기본 `claude-haiku-4-5` |
+| `GATEWAY_BASE_URL` | (선택) 멀티 LLM 게이트웨이의 Anthropic 호환 주소. 넣으면 이쪽을 먼저 쓰고, 실패하면 Anthropic 직접 연결로 자동 전환 |
+| `GATEWAY_API_KEY` | (선택, 비밀값) 게이트웨이 API 키 |
+| `GATEWAY_MODEL` | (선택) 게이트웨이에서 쓸 모델 이름, 기본 `claude-haiku-4-5` |
+| `GATEWAY_PROMPT_CACHE` | (선택) `off`면 프롬프트 캐싱 미사용 — 캐싱을 지원하지 않는 중계·모델용 |
+| `GATEWAY_TOOL_CHOICE_NONE` | (선택) `off`면 마지막 턴의 `tool_choice: none`을 보내지 않음 |
+| `GATEWAY_OFF` | (선택) `true`면 게이트웨이 설정을 남겨 둔 채 Anthropic 직접 연결만 사용 |
 | `DAILY_LIMIT` | 계정당 하루 질문 수, 기본 30 |
 | `DAILY_TOTAL_LIMIT` | 전체 하루 질문 수 상한, 기본 2000 |
 

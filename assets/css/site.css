@@ -374,8 +374,9 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
 .typing i:nth-child(3) { animation-delay: .4s; }
 @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
 .chat-input { border-top: 1px solid var(--line); padding: 12px; display: grid; gap: 8px; background: #fff; }
-.chat-input form { display: flex; gap: 8px; align-items: flex-end; }
-.chat-input textarea { flex: 1; resize: none; border: 1px solid #cdd5e1; border-radius: 14px; padding: 12px 14px; min-height: 50px; max-height: 160px; font-size: 15.5px; }
+.chat-input form { display: flex; gap: 8px; align-items: flex-end; min-width: 0; }
+/* 입력칸은 남는 폭만큼만 차지하고, 좁은 화면에서는 줄어들어 버튼이 밀려나지 않게 한다 */
+.chat-input textarea { flex: 1 1 0; min-width: 0; width: 100%; resize: none; border: 1px solid #cdd5e1; border-radius: 14px; padding: 12px 14px; min-height: 50px; max-height: 160px; font-size: 15.5px; }
 .chat-input button[type="submit"] { width: 50px; height: 50px; border-radius: 14px; border: 0; background: var(--navy); color: #fff; display: grid; place-items: center; flex: none; }
 /* 음성 입력 버튼 — 잘 보이도록 테두리를 진하게 */
 .mic { width: 52px; height: 52px; border-radius: 14px; border: 2px solid var(--navy); background: var(--blue-soft); color: var(--navy); display: grid; place-items: center; flex: none; }
@@ -397,6 +398,42 @@ dialog.mic-help { width: min(460px, calc(100% - 32px)); }
 .voice-cue svg { width: 16px; height: 16px; }
 .voice-cue[hidden] { display: none; }
 .chat-input button svg { width: 20px; height: 20px; }
+.chat-input .mic svg { width: 24px; height: 24px; }
+/* 아주 좁은 화면(작은 폰, 글씨 크게 설정)에서는 버튼과 간격을 조금 줄인다 — 그래도 누르기 권장 크기(44px)는 지킨다 */
+@media (max-width: 360px) {
+  .chat-input { padding: 10px; }
+  .chat-input form { gap: 6px; }
+  .chat-input textarea { padding: 12px 10px; }
+  .mic, .chat-input button[type="submit"] { width: 46px; height: 46px; }
+}
+/* 채팅 머리: 좁은 화면에서는 버튼을 아이콘 정사각형으로, 제목은 한 줄로 */
+@media (max-width: 640px) {
+  .chat-top { padding: 10px 12px; gap: 8px; }
+  .chat-top b { white-space: nowrap; }
+  .chat-top .spacer { gap: 6px; flex: none; }
+  .chat-top .spacer .btn { width: 42px; min-height: 42px; padding: 0; }
+  .chat-top .spacer .btn svg { width: 20px; height: 20px; }
+}
+@media (max-width: 360px) {
+  .chat-top [data-see-logo] svg { width: 34px; height: 28px; }
+  .chat-top b { font-size: 15px; }
+  .chat-top .spacer { gap: 4px; }
+  .chat-top .spacer .btn { width: 40px; min-height: 40px; }
+  /* 맨 위 머리글: 교육청 로고와 상담·메뉴 버튼이 겹치지 않게 SEE 말풍선은 숨긴다 */
+  .brand .bar, .brand .see { display: none; }
+}
+@media (max-width: 299px) {
+  .chat-top [data-see-logo] { display: none; }
+  .chat-top { flex-wrap: wrap; }
+  .chat-top .spacer { margin-left: auto; }
+  .brand .jbe { height: 26px; }
+}
+/* 글씨를 크게 설정한 휴대폰(실제 보이는 폭이 300px 미만): 입력칸은 한 줄 전체, 마이크·보내기는 아래 줄에 넓게 */
+@media (max-width: 299px) {
+  .chat-input form { flex-wrap: wrap; }
+  .chat-input textarea { flex: 1 1 100%; }
+  .mic, .chat-input button[type="submit"] { flex: 1 1 0; width: auto; height: 48px; }
+}
 .chat-input .hint { font-size: 12.5px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .login-gate { flex: 1; display: grid; place-items: center; padding: 32px 20px; text-align: center; background: #fbfcfe; }
 .login-gate[hidden] { display: none; }

@@ -34,7 +34,7 @@
       };
       rec.onerror = (e) => {
         setState(false);
-        if (e.error === "not-allowed" || e.error === "service-not-allowed") showMicHelp();
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") showMicHelp({ retry: askAndStart });
         else if (e.error === "no-speech") SEE.toast("소리가 들리지 않았어요. 다시 눌러 말씀해 주세요.");
         else if (e.error === "audio-capture") SEE.toast("마이크를 찾지 못했어요. 다른 앱이 마이크를 쓰고 있는지 확인해 주세요.");
         else if (e.error === "network") SEE.toast("인터넷 연결이 끊겨 음성 인식을 못 했어요.");
@@ -47,19 +47,83 @@
         field.focus();
       } catch {
         setState(false);
+        SEE.toast("마이크 버튼을 한 번 더 눌러 주세요.");
       }
     }
 
-    btn.addEventListener("click", () => {
+    // 브라우저의 '마이크 허용' 창을 바로 띄우고, 허용되면 듣기 시작
+    async function askAndStart() {
+      const r = await requestMic();
+      if (r === "granted" || r === "unknown") start();
+      else if (r === "denied") showMicHelp({ blocked: true, retry: askAndStart });
+      else SEE.toast("마이크를 찾지 못했어요. 다른 앱이 마이크를 쓰고 있는지 확인해 주세요.");
+    }
+
+    btn.addEventListener("click", async () => {
       if (listening) { rec && rec.stop(); setState(false); return; }
-      start();
+      const state = await micState();
+      if (state === "granted") return start();
+      if (state === "denied") return showMicHelp({ blocked: true, retry: askAndStart });
+      // 아직 묻지 않은 상태: 무엇을 눌러야 하는지 먼저 알려 주고, 바로 브라우저 허용 창을 띄운다
+      showPrimer(askAndStart);
     });
     setState(false);
     return true;
   }
 
+  /* ---------- 마이크 권한 ----------
+     웹사이트는 마이크를 스스로 켤 수 없다(보안 규칙). 대신 이용자가 누른 순간 브라우저의 '허용' 창을 바로 띄운다. */
+  async function micState() {
+    try {
+      const s = await navigator.permissions.query({ name: "microphone" });
+      return s.state; // granted | denied | prompt
+    } catch {
+      return "unknown"; // 아이폰 일부 버전 등은 상태 확인을 지원하지 않는다
+    }
+  }
+
+  async function requestMic() {
+    if (!navigator.mediaDevices?.getUserMedia) return "unknown";
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop()); // 허용만 받고 바로 끈다
+      return "granted";
+    } catch (e) {
+      return e && (e.name === "NotAllowedError" || e.name === "SecurityError") ? "denied" : "error";
+    }
+  }
+
+  function dialog(html) {
+    const dlg = document.createElement("dialog");
+    dlg.className = "mic-help";
+    dlg.innerHTML = html;
+    document.body.appendChild(dlg);
+    dlg.addEventListener("close", () => dlg.remove());
+    dlg.showModal();
+    return dlg;
+  }
+
+  // 처음 쓸 때: 다음에 뜨는 창에서 '허용'을 누르라고 미리 알려 준다
+  function showPrimer(onGo) {
+    const ua = navigator.userAgent;
+    const allowWord = /iPhone|iPad|iPod/.test(ua) ? "허용" : "허용(또는 '이번만 허용')";
+    const dlg = dialog(`<div class="dlg-head"><h2>마이크를 켜 주세요</h2></div>
+      <div class="dlg-body" style="text-align:center">
+        <div class="mic-big">${SEE.icon("mic")}</div>
+        <p>말로 질문하려면 마이크가 필요해요.<br>아래 버튼을 누르면 휴대폰이 마이크 사용을 묻습니다.</p>
+        <p class="big">그때 <strong>'${allowWord}'</strong>을 눌러 주세요</p>
+        <p class="src">말소리는 글자로 바꾸는 데에만 쓰고 저장하지 않아요.</p>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn btn-line btn-sm" type="button" value="no">글로 입력할게요</button>
+        <button class="btn btn-navy" type="button" value="go">${SEE.icon("mic")}마이크 켜기</button>
+      </div>`);
+    dlg.querySelector("[value=no]").addEventListener("click", () => dlg.close());
+    dlg.querySelector("[value=go]").addEventListener("click", () => { dlg.close(); onGo(); });
+  }
+
   /* 마이크가 막혔을 때 기기에 맞는 방법을 안내한다 */
-  function showMicHelp() {
+  function showMicHelp(opts = {}) {
     const ua = navigator.userAgent;
     const iOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     const android = /Android/.test(ua);
@@ -74,18 +138,20 @@
     } else {
       steps = ["주소창 왼쪽의 <strong>자물쇠 아이콘</strong>을 누릅니다.", "<strong>마이크</strong>를 '허용'으로 바꿉니다.", "바꾼 뒤 이 화면을 새로 고쳐 주세요."];
     }
-    const dlg = document.createElement("dialog");
-    dlg.className = "mic-help";
-    dlg.innerHTML = `<div class="dlg-head"><h2>마이크 사용을 허용해 주세요</h2></div>
+    const canRetry = typeof opts.retry === "function" && !inApp;
+    const dlg = dialog(`<div class="dlg-head"><h2>${opts.blocked ? "마이크가 꺼져 있어요" : "마이크 사용을 허용해 주세요"}</h2></div>
       <div class="dlg-body">
+        ${canRetry ? `<p>먼저 <strong>'다시 시도'</strong>를 눌러 보세요. 허용 창이 뜨면 <strong>'허용'</strong>을 누르면 됩니다.</p>
+        <p class="src">창이 뜨지 않으면 예전에 '차단'을 눌러 둔 상태예요. 이때는 아래 방법으로 한 번만 바꿔 주시면 됩니다.</p>` : ""}
         <ol style="padding-left:20px;display:grid;gap:8px">${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
         <p class="notice blue" style="margin-top:4px"><span>휴대폰 자판(키보드)에 있는 <strong>마이크 모양 키</strong>를 눌러 말해도 글자가 입력됩니다. 이 방법은 허용 설정 없이 바로 쓸 수 있어요.</span></p>
       </div>
-      <div class="dlg-foot"><button class="btn btn-navy btn-sm" type="button" value="close">알겠습니다</button></div>`;
-    document.body.appendChild(dlg);
+      <div class="dlg-foot">
+        <button class="btn btn-line btn-sm" type="button" value="close">닫기</button>
+        ${canRetry ? `<button class="btn btn-navy" type="button" value="retry">${SEE.icon("mic")}다시 시도</button>` : ""}
+      </div>`);
     dlg.querySelector("[value=close]").addEventListener("click", () => dlg.close());
-    dlg.addEventListener("close", () => dlg.remove());
-    dlg.showModal();
+    dlg.querySelector("[value=retry]")?.addEventListener("click", () => { dlg.close(); opts.retry(); });
   }
 
   /* ---------- 답변을 소리로 읽어 주기 ---------- */

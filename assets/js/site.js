@@ -104,7 +104,7 @@
           <div>
             <img src="assets/img/jbe-logo-white.png" alt="전북특별자치도교육청 JEONBUK STATE OFFICE OF EDUCATION" width="640" height="116">
             <address>(55065) 전북특별자치도 전주시 완산구 홍산로 111 전북특별자치도교육청<br>
-            대표전화 063-1396 (평일 9:00~18:00) · 담당 유초등특수교육과</address>
+            대표전화 063-1396 (평일 9:00~18:00) · <span style="display:inline-block">정책국 미래교육과 AI·디지털 담당 장학사 박정교</span></address>
           </div>
           <div class="foot-links">
             <a href="https://www.jbe.go.kr/" target="_blank" rel="noopener">교육청 누리집</a>

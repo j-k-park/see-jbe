@@ -156,8 +156,9 @@
 <script src="assets/js/voice.js"></script>
 <script>
   (function () {
-    SEE.voice?.attach(document.getElementById("hero-mic"), document.getElementById("hero-q"));
-    const go = (q) => { location.href = "chat.html?q=" + encodeURIComponent(q); };
+    const go = (q, byVoice) => { location.href = "chat.html?q=" + encodeURIComponent(q) + (byVoice ? "&v=1" : ""); };
+    // 마이크로 말하면 바로 AI 상담으로 넘어가 묻고, 답변을 읽어 준다
+    SEE.voice?.bindMic(document.getElementById("hero-mic"), document.getElementById("hero-q"), (t) => go(t, true));
     document.getElementById("hero-ask").addEventListener("submit", (e) => {
       e.preventDefault();
       const q = document.getElementById("hero-q").value.trim();

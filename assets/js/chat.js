@@ -45,11 +45,12 @@
     gate.hidden = true;
     log.hidden = inputArea.hidden = false;
     renderAll();
-    let q = new URLSearchParams(location.search).get("q");
+    const sp = new URLSearchParams(location.search);
+    let q = sp.get("q");
     try { q = q || sessionStorage.getItem("see.pendingQ"); sessionStorage.removeItem("see.pendingQ"); } catch {}
     if (q) {
       window.history.replaceState(null, "", "chat.html");
-      send(q);
+      send(q, sp.get("v") === "1"); // 홈에서 말로 물었으면 답변도 읽어 준다
     } else ta.focus();
   }
 
@@ -75,7 +76,7 @@
       <div class="bubble">${md(m.content || "")}</div>
       ${(m.attachments || []).map(attachHtml).join("")}
       ${m.content ? `<div class="tools">
-        ${SEE.speech?.supported ? `<button type="button" data-act="speak">${icon("sound")} 듣기</button>` : ""}
+        ${SEE.voice?.canSpeak ? `<button type="button" data-act="speak">${icon("sound")} 듣기</button>` : ""}
         <button type="button" data-act="copy">${icon("copy")} 복사</button>
         <button type="button" data-act="pdf">${icon("print")} PDF</button>
         <button type="button" data-act="docx">${icon("file")} 워드</button>
@@ -144,8 +145,7 @@
 
   $("reset").addEventListener("click", () => {
     if (busy) return;
-    SEE.speech?.stop();
-    resetSpeakBtn();
+    SEE.voice?.stop();
     if (history.length && !confirm("지금까지의 대화를 지우고 새로 시작할까요?")) return;
     history = [];
     persist();
@@ -174,14 +174,14 @@
     dlg.showModal();
   });
 
-  async function send(text) {
+  /** byVoice: 말로 물었으면 답변도 소리로 읽어 준다 */
+  async function send(text, byVoice) {
     text = String(text || "").trim();
     if (!text || busy) return;
     if (!SEEAuth.token() && !devMode) { toast("로그인이 만료되었습니다. 다시 로그인해 주세요."); return boot(); }
     busy = true;
-    SEE.speech?.stop();
-    if (autoRead.on) SEE.speech?.unlock();
-    resetSpeakBtn();
+    SEE.voice?.stop();
+    SEE.voice?.unlock(); // 휴대폰은 누른 순간에만 소리 재생 권한이 열린다
     ta.value = "";
     ta.style.height = "auto";
     history.push({ role: "user", content: text });
@@ -216,7 +216,7 @@
       bindMsgTools(log);
       log.scrollTop = log.scrollHeight;
       ta.focus();
-      if (autoRead.on && ai.content && SEE.speech?.supported) {
+      if ((byVoice || autoRead.on) && ai.content && SEE.voice?.canSpeak) {
         const btn = log.querySelector(`.msg.ai[data-i="${idx}"] [data-act="speak"]`);
         if (btn) readAloud(ai.content, btn);
       }
@@ -259,45 +259,51 @@
     }
   }
 
-  /* 답변 소리로 듣기 */
-  let speakingBtn = null;
+  /* 답변 소리로 듣기 — 구글 자연스러운 한국어 음성(없으면 기기 음성) */
+  let speakingBtn = null, speakSeq = 0;
   function resetSpeakBtn() {
     if (speakingBtn) { speakingBtn.innerHTML = `${icon("sound")} 듣기`; speakingBtn.classList.remove("on"); }
     speakingBtn = null;
   }
   function readAloud(text, btn) {
-    if (speakingBtn === btn) { SEE.speech.stop(); return; } // 다시 누르면 멈춤
-    SEE.speech.stop();
+    if (speakingBtn === btn) { SEE.voice.stop(); return; } // 다시 누르면 멈춤
     resetSpeakBtn();
-    const ok = SEE.speech.speak(text, () => resetSpeakBtn());
-    if (!ok) return toast("이 기기에서는 소리로 읽어 줄 수 없어요.");
+    const my = ++speakSeq;
     speakingBtn = btn;
     btn.innerHTML = `${icon("stop")} 멈춤`;
     btn.classList.add("on");
+    SEE.voice.speak(text, (r) => {
+      if (my !== speakSeq) return; // 다른 답변을 읽기 시작했으면 그대로 둔다
+      resetSpeakBtn();
+      if (r === "blocked") toast("소리를 내려면 '듣기' 버튼을 한 번 눌러 주세요.");
+      else if (r === "error") toast("소리로 읽지 못했어요. 잠시 뒤 다시 눌러 주세요.");
+    });
   }
   const autoKey = "see.autoRead";
   const autoRead = { get on() { try { return localStorage.getItem(autoKey) === "1"; } catch { return false; } },
                      set(v) { try { localStorage.setItem(autoKey, v ? "1" : "0"); } catch {} } };
   const autoBtn = $("auto-read");
-  if (autoBtn && SEE.speech?.supported) {
+  if (autoBtn && SEE.voice?.canSpeak) {
     const sync = () => {
       autoBtn.setAttribute("aria-pressed", String(autoRead.on));
       autoBtn.classList.toggle("on", autoRead.on);
-      autoBtn.title = autoRead.on ? "새 답변을 자동으로 읽어 줍니다" : "새 답변을 자동으로 읽지 않습니다";
+      autoBtn.title = autoRead.on ? "새 답변을 모두 자동으로 읽어 줍니다" : "말로 물은 질문의 답변만 읽어 줍니다";
     };
-    autoBtn.addEventListener("click", () => { autoRead.set(!autoRead.on); sync(); if (!autoRead.on) SEE.speech.stop(); else toast("이제 새 답변을 소리로 읽어 드려요."); });
+    autoBtn.addEventListener("click", () => {
+      autoRead.set(!autoRead.on); sync();
+      if (!autoRead.on) { SEE.voice.stop(); toast("말로 물은 질문의 답변만 읽어 드려요."); }
+      else { SEE.voice.unlock(); toast("이제 새 답변을 모두 소리로 읽어 드려요."); }
+    });
     sync();
   } else if (autoBtn) autoBtn.hidden = true;
 
-  /* 음성 입력 */
+  /* 음성 입력 — 누르면 바로 듣고, 말이 끝나면 자동으로 보낸다 */
   (function voiceSetup() {
-    const hintEl = $("voice-hint");
-    const defaultHint = hintEl ? hintEl.textContent : "";
-    const ok = SEE.voice?.attach($("mic"), ta, { hint: hintEl, hintText: defaultHint });
+    const ok = SEE.voice?.bindMic($("mic"), ta, (t) => send(t, true));
     const tip = $("voice-tip");
     if (ok && tip) tip.hidden = false;
     const stip = $("speech-tip");
-    if (SEE.speech?.supported && stip) stip.hidden = false;
+    if (SEE.voice?.canSpeak && stip) stip.hidden = false;
     const cue = $("voice-cue");
     if (ok && cue) {
       cue.hidden = false; // 아이콘은 site.js가 이미 채워 둔다

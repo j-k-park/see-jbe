@@ -36,7 +36,8 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # 마이크는 이 사이트(음성으로 질문하기)에서만 허용
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=()"
 
 [[headers]]
   for = "/data/*"

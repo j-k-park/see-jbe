@@ -546,6 +546,11 @@ dialog.mic-help { width: min(460px, calc(100% - 32px)); }
   .test-card dl, .detail dl { grid-template-columns: minmax(0, 1fr); }
   .test-card dt, .detail dt { margin-top: 4px; }
   .util-links a:nth-child(n+3) { display: none; }
+  /* 로그인하면 이름·로그아웃이 둘째 줄로 밀려 줄 사이가 벌어지던 문제 — 한 줄로 붙이고, 좁으면 이름은 숨긴다(사진·로그아웃은 남김) */
+  .util .wrap { flex-wrap: nowrap; gap: 10px; }
+  .util-links { flex-wrap: nowrap; gap: 12px; min-width: 0; overflow: hidden; white-space: nowrap; }
+  .util-user { flex: none; gap: 6px; white-space: nowrap; }
+  .util-user button { padding: 6px 10px; }
   .t-table { min-width: 0; }
   .t-table thead { display: none; }
   .t-table tr { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 12px 14px; border-bottom: 1px solid var(--line-2); }
@@ -569,4 +574,10 @@ dialog.mic-help { width: min(460px, calc(100% - 32px)); }
   .filters summary::after { content: "▾"; color: var(--ink-3); }
   .filters details[open] summary::after { content: "▴"; }
   .filters details[open] summary { margin-bottom: 4px; }
+}
+@media (max-width: 480px) {
+  .util-user span { display: none; }
+}
+@media (max-width: 340px) {
+  .util-links a:nth-child(n+2) { display: none; }
 }

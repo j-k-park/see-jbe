@@ -120,7 +120,7 @@
       const u = read();
       const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       if (u) {
-        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">` : ""}<span>${esc(u.name)}님</span><button type="button" id="util-logout">로그아웃</button>`;
+        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="${esc(u.name)}님" title="${esc(u.name)}님 로그인 중" referrerpolicy="no-referrer">` : ""}<span>${esc(u.name)}님</span><button type="button" id="util-logout">로그아웃</button>`;
         box.querySelector("#util-logout").addEventListener("click", api.signOut);
       } else {
         box.innerHTML = `<a href="chat.html">AI 상담 로그인</a>`;

@@ -19,7 +19,7 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <img class="vision" src="assets/img/vision.png" alt="살아가는 힘을 키우는 전북교육" width="1000" height="198">
+        <div class="vmw" id="vision"><img class="vision" src="assets/img/vision.png" alt="살아가는 힘을 키우는 전북교육" width="1000" height="198"></div>
         <h1>우리 아이 발달이 걱정될 때,<br><em>혼자 고민하지 마세요</em></h1>
         <p class="lead">발달 정보 확인부터 선별검사, 특수교육 지원, 우리 동네 기관 찾기까지. 전북특별자치도교육청이 한 걸음씩 함께 안내합니다.</p>
         <form class="ask-box" id="hero-ask" role="search" aria-label="AI 상담 SEE에게 질문하기">
@@ -47,7 +47,27 @@
           <i class="twinkle" style="--x:8%;--y:56%;--dl:-.6s;--s:10px"></i>
           <i class="twinkle" style="--x:70%;--y:6%;--dl:-1.6s;--s:9px"></i>
         </div>
-        <div class="see-float" id="see-float"><img src="assets/img/see-concept.jpg" alt="말풍선 모양의 SEE 구름 로고" width="600" height="492"></div>
+        <div class="stage">
+          <div class="see-float" id="see-float"><img src="assets/img/see-concept.jpg" alt="말풍선 모양의 SEE 구름 로고" width="600" height="492"></div>
+          <!-- 비전 영상: 접속 2초 뒤 SEE 자리에서 재생(소리 끔으로 시작), 끝나면 다시 SEE. 멈추면 '이어서 재생 / SEE 보기' 선택 -->
+          <div class="vv" id="vv" hidden>
+            <video id="vv-video" playsinline preload="none" aria-label="살아가는 힘을 키우는 전북교육 비전 영상"></video>
+            <div class="vv-bar" aria-hidden="true"><i id="vv-prog"></i></div>
+            <div class="vv-ctrl">
+              <button type="button" id="vv-sound" aria-pressed="true"></button>
+              <button type="button" id="vv-full"></button>
+              <button type="button" id="vv-pause" aria-label="일시정지"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg><span>일시정지</span></button>
+            </div>
+            <div class="vv-paused" id="vv-paused" hidden>
+              <p>영상을 멈췄어요</p>
+              <div class="vv-choice">
+                <button type="button" class="btn btn-navy btn-sm" id="vv-resume"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>이어서 재생</button>
+                <button type="button" class="btn btn-line btn-sm" id="vv-see">SEE 보기</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="vv-replay" id="vv-replay" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>비전 영상 보기</button>
+        </div>
         <div class="cap">
           <div><b>AI 상담 SEE</b><span>궁금한 점을 물어보면 안내하고, 필요한 자료도 만들어 드려요</span></div>
           <a class="btn btn-navy btn-sm" href="chat.html">상담 시작</a>
@@ -176,6 +196,126 @@
       const q = document.getElementById("hero-q").value.trim();
       q ? go(q) : (location.href = "chat.html");
     });
+    // 비전 문구 움직임(assets/img/vision-motion.svg, 선도학교 누리집과 같은 그림). 못 불러오면 원래 그림 그대로
+    (async () => {
+      const el = document.getElementById("vision"), KEY = "see.vision.still";
+      let svgText;
+      try { svgText = await fetch("assets/img/vision-motion.svg").then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); }); } catch { return; }
+      el.innerHTML = svgText + '<button type="button" class="vm-toggle"></button>';
+      const svg = el.querySelector("svg"), btn = el.querySelector(".vm-toggle");
+      const set = (still) => {
+        svg.classList.toggle("still", still);
+        btn.setAttribute("aria-pressed", String(still));
+        btn.title = still ? "움직임 다시 재생" : "움직임 멈추기";
+        btn.setAttribute("aria-label", btn.title);
+        btn.innerHTML = still
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>';
+      };
+      let still = false;
+      try { still = localStorage.getItem(KEY) === "1"; } catch {}
+      set(still);
+      btn.addEventListener("click", () => {
+        const now = !svg.classList.contains("still");
+        set(now);
+        try { localStorage.setItem(KEY, now ? "1" : "0"); } catch {}
+      });
+    })();
+    // 비전 영상: 처음 2초는 SEE 구름, 그다음 영상(소리 켜고 시작), 끝나면 다시 SEE 구름
+    // 브라우저가 소리 있는 자동 재생을 막으면 소리 없이 시작 → '소리 켜기' 단추를 반짝이고, 화면을 처음 누르는 순간 소리를 켠다
+    (function visionVideo() {
+      const hv = document.querySelector(".hero-visual"), box = document.getElementById("vv"), v = document.getElementById("vv-video");
+      const $ = (id) => document.getElementById(id);
+      const SRC = "assets/video/vision.mp4";
+      const ICON = {
+        on: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+        off: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor"/><path d="m16 9 6 6M22 9l-6 6"/></svg>',
+        full: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+        exit: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+      };
+      let userMuted = false;   // 이용자가 직접 '소리 끄기'를 눌렀는지
+      let autoMuted = false;   // 브라우저 규칙 때문에 소리 없이 시작했는지
+      const soundUi = () => {
+        const b = $("vv-sound");
+        b.innerHTML = (v.muted ? ICON.off : ICON.on) + `<span>${v.muted ? "소리 켜기" : "소리 끄기"}</span>`;
+        b.setAttribute("aria-pressed", String(!v.muted));
+        b.setAttribute("aria-label", v.muted ? "소리 켜기" : "소리 끄기");
+        b.classList.toggle("need", v.muted && autoMuted);
+      };
+      const unmute = () => { autoMuted = false; v.muted = false; soundUi(); };
+      // 화면 어디든 처음 누르면 소리 켜기(이용자가 끈 경우는 제외)
+      let skipClick = false;
+      const firstTouch = (e) => {
+        if (!autoMuted || userMuted || $("vv-sound").contains(e.target)) return; // 소리 단추는 자기 일을 한다
+        unmute();
+        if (e.target === v) skipClick = true; // 영상을 눌러 소리를 켠 경우 그 누름으로 멈추지 않게
+      };
+      ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, firstTouch, { capture: true }));
+
+      const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+      const exitFs = () => { if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document)?.catch?.(() => {}); };
+      const fullUi = () => {
+        const on = fsEl() === box, b = $("vv-full");
+        b.innerHTML = (on ? ICON.exit : ICON.full) + `<span>${on ? "전체화면 끝내기" : "전체화면"}</span>`;
+        b.setAttribute("aria-label", on ? "전체화면 끝내기" : "전체화면으로 보기");
+      };
+      ["fullscreenchange", "webkitfullscreenchange"].forEach((ev) => document.addEventListener(ev, fullUi));
+      $("vv-full").addEventListener("click", () => {
+        if (fsEl()) return exitFs();
+        if (box.requestFullscreen) box.requestFullscreen().catch(() => {});
+        else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
+        else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); // 아이폰은 영상만 전체화면(기본 재생기)
+      });
+
+      const showSee = () => {
+        exitFs();
+        v.pause();
+        hv.classList.remove("mode-video");
+        box.hidden = true;
+        box.classList.remove("is-paused");
+        $("vv-paused").hidden = true;
+        $("vv-replay").hidden = false;
+      };
+      const shown = () => {
+        box.hidden = false;
+        hv.classList.add("mode-video");
+        $("vv-replay").hidden = true;
+        soundUi();
+      };
+      const play = (fromStart) => {
+        if (!v.src) v.src = SRC;
+        if (fromStart) v.currentTime = 0;
+        $("vv-paused").hidden = true;
+        box.classList.remove("is-paused");
+        v.muted = userMuted;
+        return v.play().then(shown).catch((e) => {
+          if (e?.name !== "NotAllowedError" || v.muted) return showSee();
+          // 소리 있는 자동 재생이 막힘 → 소리 없이 시작
+          autoMuted = true;
+          v.muted = true;
+          return v.play().then(shown).catch(() => showSee()); // 그래도 막힌 기기(절전 모드 등)는 SEE 그대로 + '비전 영상 보기'
+        });
+      };
+      v.addEventListener("timeupdate", () => { if (v.duration) $("vv-prog").style.width = (v.currentTime / v.duration) * 100 + "%"; });
+      v.addEventListener("ended", showSee);
+      const pause = () => { v.pause(); box.classList.add("is-paused"); $("vv-paused").hidden = false; $("vv-resume").focus(); };
+      $("vv-pause").addEventListener("click", pause);
+      v.addEventListener("click", () => { if (skipClick) { skipClick = false; return; } pause(); }); // 소리 없이 재생 중 첫 누름은 소리만 켠다
+      $("vv-resume").addEventListener("click", () => play(false));
+      $("vv-see").addEventListener("click", showSee);
+      $("vv-sound").addEventListener("click", () => {
+        if (v.muted) { userMuted = false; unmute(); }
+        else { userMuted = true; v.muted = true; soundUi(); }
+      });
+      $("vv-replay").addEventListener("click", () => play(true));
+      soundUi();
+      fullUi();
+      // '동작 줄이기' 설정이면 자동 재생하지 않고 단추만
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { $("vv-replay").hidden = false; return; }
+      v.preload = "auto";
+      v.src = SRC; // SEE가 보이는 2초 동안 미리 받아 둔다
+      setTimeout(() => play(true), 2000);
+    })();
     // SEE 구름을 누르면 콩 뛰어오른다
     const fl = document.getElementById("see-float");
     fl?.addEventListener("click", () => { fl.classList.remove("hop"); void fl.offsetWidth; fl.classList.add("hop"); });

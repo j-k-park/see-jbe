@@ -8,6 +8,8 @@
   --orange: #f07d00;
   --orange-soft: #fff1e0;
   --coral: #ea5a48;
+  --mic: #e03131;
+  --mic-dark: #b71c1c;
   --coral-soft: #fdecea;
   --teal: #00a9a6;
   --teal-soft: #e0f5f4;
@@ -146,6 +148,13 @@ ul, ol { margin: 0; padding: 0; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 32px; align-items: stretch; }
 .hero-copy { display: flex; flex-direction: column; justify-content: center; gap: 18px; }
 .hero-copy .vision { width: min(360px, 100%); mix-blend-mode: multiply; }
+/* 비전 문구 움직임(선도학교 누리집과 같은 그림): 원래 그림 자리·크기 그대로, 오른쪽에 작은 멈춤 단추 */
+.hero-copy .vmw { position: relative; width: min(360px, calc(100% - 36px)); }
+.hero-copy .vmw .vision { width: 100%; display: block; }
+.hero-copy .vmw > svg.vm { display: block; width: 100%; height: auto; margin: -1.2% 0; }
+.vm-toggle { position: absolute; right: -34px; bottom: 0; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: rgba(255,255,255,.9); color: var(--ink-3); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: .7; }
+.vm-toggle:hover, .vm-toggle:focus-visible { opacity: 1; color: var(--navy); border-color: var(--navy); }
+.vm-toggle svg { width: 13px; height: 13px; }
 .hero-copy h1 { font-size: clamp(30px, 4.4vw, 46px); color: var(--navy); }
 .hero-copy h1 em { font-style: normal; color: var(--orange); }
 .hero-copy .lead { font-size: 18px; color: var(--ink-2); }
@@ -185,6 +194,41 @@ ul, ol { margin: 0; padding: 0; }
   clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); animation: twinkle 3.2s ease-in-out var(--dl) infinite; }
 .twinkle:nth-child(odd) { background: #ffe4a8; }
 @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 45% { opacity: 1; transform: scale(1) rotate(45deg); } 70% { opacity: .2; transform: scale(.6) rotate(70deg); } }
+/* 비전 영상 — SEE 구름 자리에서 재생. 영상 배경(종이색)으로 바꿔 위아래 여백이 티 나지 않게 */
+.stage { position: relative; z-index: 1; display: grid; }
+.hero-visual { transition: background .6s; }
+.hero-visual.mode-video { background: #ebe9e3; }
+.sky, .see-float { transition: opacity .5s; }
+.hero-visual.mode-video .sky, .hero-visual.mode-video .see-float { opacity: 0; pointer-events: none; }
+.vv { position: absolute; inset: 0 0 108px; display: grid; place-items: center; animation: vv-in .6s ease both; }
+.vv[hidden] { display: none; }
+@keyframes vv-in { from { opacity: 0; } to { opacity: 1; } }
+.vv video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
+.vv-bar { position: absolute; left: 14px; right: 14px; bottom: 6px; height: 3px; border-radius: 3px; background: rgba(1, 45, 99, .15); overflow: hidden; }
+.vv-bar i { display: block; height: 100%; width: 0; background: var(--navy); transition: width .25s linear; }
+.vv-ctrl { position: absolute; right: 12px; top: 12px; display: flex; gap: 6px; }
+.vv-ctrl button, .vv-replay { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; background: rgba(1, 45, 99, .78); color: #fff; font-size: 13px; font-weight: 700; padding: 7px 12px; cursor: pointer; }
+.vv-ctrl button:hover, .vv-replay:hover { background: var(--navy); }
+.vv-ctrl svg, .vv-replay svg { width: 16px; height: 16px; flex: none; }
+.vv-paused { position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; background: rgba(1, 45, 99, .62); color: #fff; animation: vv-in .25s ease both; }
+.vv-paused[hidden] { display: none; }
+.vv.is-paused .vv-ctrl { display: none; }
+/* 소리 없이 시작된 경우 '소리 켜기'를 빨갛게 반짝 */
+.vv-ctrl button.need { background: var(--mic); animation: mic-pulse 1.2s ease-in-out infinite; }
+.vv-ctrl button.need span { display: inline; }
+/* 전체화면: 영상 배경색 그대로, 단추는 조금 크게 */
+.vv:fullscreen { background: #ebe9e3; inset: 0; }
+.vv:-webkit-full-screen { background: #ebe9e3; inset: 0; }
+.vv:fullscreen .vv-ctrl { top: 20px; right: 20px; }
+.vv:fullscreen .vv-ctrl button { font-size: 15px; padding: 10px 16px; }
+.vv:fullscreen .vv-ctrl button span { display: inline; }
+.vv:fullscreen .vv-bar { left: 24px; right: 24px; bottom: 14px; height: 4px; }
+.vv-paused p { font-weight: 800; font-size: 17px; margin: 0; }
+.vv-choice { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.vv-choice .btn svg { width: 16px; height: 16px; }
+.vv-choice .btn-line { background: #fff; }
+.vv-replay { position: absolute; right: 12px; top: 12px; z-index: 2; }
+.vv-replay[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .see-float img, .see-float.hop img, .puff, .twinkle { animation: none; }
   .twinkle { opacity: .8; }
@@ -410,23 +454,26 @@ dialog::backdrop { background: rgba(1, 25, 55, .55); }
 .chat-input textarea { flex: 1 1 0; min-width: 0; width: 100%; resize: none; border: 1px solid #cdd5e1; border-radius: 14px; padding: 12px 14px; min-height: 50px; max-height: 160px; font-size: 15.5px; }
 .chat-input button[type="submit"] { width: 50px; height: 50px; border-radius: 14px; border: 0; background: var(--navy); color: #fff; display: grid; place-items: center; flex: none; }
 /* 음성 입력 버튼 — 잘 보이도록 테두리를 진하게 */
-.mic { width: 52px; height: 52px; border-radius: 14px; border: 2px solid var(--navy); background: var(--blue-soft); color: var(--navy); display: grid; place-items: center; flex: none; }
+/* 마이크(음성 입력) 단추는 눈에 띄게 빨간색 — 모든 마이크 단추 같은 색 */
+.mic { width: 52px; height: 52px; border-radius: 14px; border: 2px solid var(--mic); background: var(--mic); color: #fff; display: grid; place-items: center; flex: none; box-shadow: 0 2px 8px rgba(214, 40, 40, .28); }
 .mic svg { width: 26px; height: 26px; }
-.mic:hover { border-color: var(--navy); }
-.mic.listening { background: var(--coral); border-color: var(--coral); color: #fff; animation: mic-pulse 1.4s ease-in-out infinite; }
+.mic:hover { background: var(--mic-dark); border-color: var(--mic-dark); }
+.mic:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.mic.listening { background: var(--mic-dark); border-color: var(--mic-dark); color: #fff; animation: mic-pulse 1.2s ease-in-out infinite; }
 .mic[hidden] { display: none; }
-@keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(234, 90, 72, .45); } 50% { box-shadow: 0 0 0 10px rgba(234, 90, 72, 0); } }
-.ask-box .mic { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--navy); background: var(--blue-soft); }
+@keyframes mic-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(214, 40, 40, .55); } 50% { box-shadow: 0 0 0 12px rgba(214, 40, 40, 0); } }
+.ask-box .mic { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--mic); background: var(--mic); }
+.ask-box .mic:hover { background: var(--mic-dark); border-color: var(--mic-dark); }
 .ask-box .mic svg { width: 22px; height: 22px; }
-.ask-box .mic.listening { background: var(--coral); border-color: var(--coral); }
+.ask-box .mic.listening { background: var(--mic-dark); border-color: var(--mic-dark); }
 dialog.mic-help { width: min(460px, calc(100% - 32px)); }
 .mic-help .notice { font-size: 14px; }
-.mic-help .mic-big { width: 72px; height: 72px; border-radius: 50%; margin: 4px auto 6px; display: grid; place-items: center; background: var(--blue-soft); color: var(--navy); border: 2px solid var(--navy); }
+.mic-help .mic-big { width: 72px; height: 72px; border-radius: 50%; margin: 4px auto 6px; display: grid; place-items: center; background: var(--mic); color: #fff; border: 2px solid var(--mic); }
 .mic-help .mic-big svg { width: 34px; height: 34px; }
 .mic-help .dlg-foot .btn svg { width: 20px; height: 20px; }
 /* 입력칸 위 '말로 입력하기' 안내 */
 .voice-cue { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--navy); background: var(--blue-soft); border-radius: 999px; padding: 6px 12px; align-self: flex-start; }
-.voice-cue svg { width: 16px; height: 16px; }
+.voice-cue svg { width: 16px; height: 16px; color: var(--mic); }
 .voice-cue[hidden] { display: none; }
 .chat-input button svg { width: 20px; height: 20px; }
 .chat-input .mic svg { width: 24px; height: 24px; }
@@ -483,6 +530,29 @@ dialog.mic-help { width: min(460px, calc(100% - 32px)); }
 .fab svg { width: 46px; height: 38px; }
 .fab b { color: var(--navy); font-size: 15px; display: block; line-height: 1.2; }
 .fab small { color: var(--ink-3); font-size: 12px; display: block; line-height: 1.2; }
+/* AI 상담 알림 — 위쪽 'AI 상담 SEE' 단추엔 빛줄기, 아래 SEE는 둥실 떠 있다 가끔 콩. 처음 방문 땐 SEE가 말풍선으로 인사(.greet: 손 흔들기·말하듯 통통) */
+.btn-ai { position: relative; overflow: hidden; }
+.btn-ai::after { content: ""; position: absolute; top: 0; bottom: 0; width: 45%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent); animation: ai-shine 4.5s ease-in-out infinite; pointer-events: none; }
+@keyframes ai-shine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+.btn-ai.greet svg { animation: ai-talk 1.3s ease-in-out 1; }
+@keyframes ai-talk { 0%, 100% { transform: none; } 20% { transform: scale(1.3) rotate(-8deg); } 40% { transform: none; } 60% { transform: scale(1.25) rotate(6deg); } 80% { transform: none; } }
+.fab { box-shadow: 0 8px 24px rgba(1, 45, 99, .18), 0 0 0 4px rgba(140, 189, 230, .35); }
+.fab svg { animation: fab-float 6s ease-in-out infinite; }
+@keyframes fab-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 25% { transform: translateY(-4px) rotate(2deg); } 50% { transform: translateY(0) rotate(-2deg); } 58% { transform: translateY(-12px) scale(1.08, .95); } 66% { transform: translateY(0) scale(1.05, .95); } 75% { transform: translateY(-3px) rotate(2deg); } }
+.fab.greet svg { transform-origin: 50% 80%; animation: fab-wave 1.4s ease-in-out 1; }
+@keyframes fab-wave { 0%, 100% { transform: none; } 15% { transform: rotate(-12deg); } 35% { transform: rotate(10deg); } 55% { transform: rotate(-8deg); } 75% { transform: rotate(5deg); } }
+.see-tip { position: fixed; right: 20px; bottom: 88px; z-index: 51; display: flex; align-items: center; gap: 2px; background: var(--navy); color: #fff; border-radius: 16px 16px 4px 16px; padding: 4px 4px 4px 14px; box-shadow: 0 8px 20px rgba(1, 45, 99, .25); transform-origin: 90% 100%; animation: tip-in .45s cubic-bezier(.3, 1.4, .5, 1) both; }
+.see-tip.out { animation: tip-out .3s ease forwards; }
+.see-tip a { color: #fff; text-decoration: none; font-weight: 700; font-size: 14.5px; padding: 6px 0; }
+.see-tip button { border: 0; background: transparent; color: #fff; opacity: .75; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
+.see-tip button:hover { opacity: 1; background: rgba(255, 255, 255, .15); }
+.see-tip button svg { width: 16px; height: 16px; }
+@keyframes tip-in { from { opacity: 0; transform: scale(.5) translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes tip-out { to { opacity: 0; transform: scale(.85) translateY(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn-ai::after { display: none; }
+  .fab svg, .fab.greet svg, .btn-ai.greet svg, .see-tip, .see-tip.out { animation: none; }
+}
 
 /* ---------- 바닥글 ---------- */
 .site-foot { background: #0e1c33; color: #b9c3d3; margin-top: 0; padding-block: 36px 44px; font-size: 14px; }
@@ -534,6 +604,8 @@ dialog.mic-help { width: min(460px, calc(100% - 32px)); }
   /* 태블릿·휴대폰에서는 그림 전체가 보이고 설명은 그림 아래에 놓이게 */
   .hero-visual { min-height: 0; height: auto; display: flex; flex-direction: column; }
   .see-float { padding: 14px 14px 10px; }
+  .vv { inset: 0; }
+  .vv-ctrl button span, .vv-replay span { display: none; }
   .see-float img { width: auto; height: 250px; }
   .hero-visual .cap { position: relative; border-radius: 0; background: #fff; left: auto; right: auto; bottom: auto; }
   .g3, .g4, .benefits, .where, .dev-grid, .result-pick, .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }

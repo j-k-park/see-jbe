@@ -124,6 +124,7 @@
       a.innerHTML = `${SEE_LOGO}<span class="t"><b>SEE에게 물어보기</b><small>AI 상담</small></span>`;
       a.setAttribute("aria-label", "AI 상담 SEE에게 물어보기");
       document.body.appendChild(a);
+      greet(a);
     }
     document.querySelectorAll("[data-icon]").forEach((el) => {
       el.insertAdjacentHTML("afterbegin", icon(el.dataset.icon));
@@ -333,6 +334,32 @@
     <button class="btn btn-line btn-sm" type="button" data-save="pdf" data-doc="${id}">${icon("print")}PDF·인쇄</button>
     <button class="btn btn-line btn-sm" type="button" data-save="docx" data-doc="${id}">${icon("file")}워드(.docx)</button>
     <button class="btn btn-line btn-sm" type="button" data-save="txt" data-doc="${id}">${icon("download")}텍스트</button>`;
+
+  /* AI 상담 알림 — SEE가 말풍선으로 "궁금한 점은 SEE에게 물어보세요!" 인사.
+     이번 방문(탭)에서 3번까지, 20초 간격으로 5초씩. ✕로 닫으면 이번 방문 동안 다시 안 나온다 */
+  function greet(fab) {
+    const KEY = "see.tip";
+    const st = () => { try { return JSON.parse(sessionStorage.getItem(KEY) || "{}"); } catch { return {}; } };
+    const save = (v) => { try { sessionStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+    const MAX = 3, SHOW = 5000, GAP = 20000;
+    const once = () => {
+      const s = st();
+      if (s.off || (s.n || 0) >= MAX || document.hidden) return;
+      save({ ...s, n: (s.n || 0) + 1 });
+      const tip = document.createElement("div");
+      tip.className = "see-tip";
+      tip.setAttribute("role", "status");
+      tip.innerHTML = `<a href="chat.html">궁금한 점은 SEE에게 물어보세요!</a><button type="button" aria-label="안내 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+      document.body.appendChild(tip);
+      const ai = document.querySelector(".btn-ai");
+      [fab, ai].forEach((el) => { if (el) { el.classList.remove("greet"); void el.offsetWidth; el.classList.add("greet"); } });
+      setTimeout(() => [fab, ai].forEach((el) => el?.classList.remove("greet")), 1500); // 인사가 끝나면 다시 둥실
+      const close = () => { tip.classList.add("out"); setTimeout(() => tip.remove(), 300); };
+      tip.querySelector("button").addEventListener("click", () => { save({ ...st(), off: true }); close(); });
+      setTimeout(() => { if (tip.isConnected) close(); if ((st().n || 0) < MAX && !st().off) setTimeout(once, GAP); }, SHOW);
+    };
+    setTimeout(once, 2500);
+  }
 
   window.SEE = { icon, esc, SEE_LOGO, STEPS, md, mdToBlocks, saveAs, saveCsv, saveButtons, toast, today };
 

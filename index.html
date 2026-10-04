@@ -35,7 +35,19 @@
         </div>
       </div>
       <div class="hero-visual">
-        <img src="assets/img/see-concept.jpg" alt="말풍선 모양의 SEE 로고" width="600" height="492">
+        <!-- 하늘에 떠 있는 SEE 구름: 둥실둥실 떠다니고, 작은 구름이 지나가며 별이 반짝인다(누르면 콩 뛰어오름) -->
+        <div class="sky" aria-hidden="true">
+          <span class="puff" style="--w:120px;--y:12%;--d:46s;--dl:-8s"></span>
+          <span class="puff" style="--w:80px;--y:34%;--d:38s;--dl:-27s;--o:.6"></span>
+          <span class="puff" style="--w:150px;--y:58%;--d:58s;--dl:-40s;--o:.55"></span>
+          <span class="puff" style="--w:64px;--y:6%;--d:32s;--dl:-15s;--o:.7"></span>
+          <i class="twinkle" style="--x:14%;--y:20%;--dl:0s"></i>
+          <i class="twinkle" style="--x:84%;--y:14%;--dl:-1.1s;--s:12px"></i>
+          <i class="twinkle" style="--x:90%;--y:52%;--dl:-2s"></i>
+          <i class="twinkle" style="--x:8%;--y:56%;--dl:-.6s;--s:10px"></i>
+          <i class="twinkle" style="--x:70%;--y:6%;--dl:-1.6s;--s:9px"></i>
+        </div>
+        <div class="see-float" id="see-float"><img src="assets/img/see-concept.jpg" alt="말풍선 모양의 SEE 구름 로고" width="600" height="492"></div>
         <div class="cap">
           <div><b>AI 상담 SEE</b><span>궁금한 점을 물어보면 안내하고, 필요한 자료도 만들어 드려요</span></div>
           <a class="btn btn-navy btn-sm" href="chat.html">상담 시작</a>
@@ -164,6 +176,10 @@
       const q = document.getElementById("hero-q").value.trim();
       q ? go(q) : (location.href = "chat.html");
     });
+    // SEE 구름을 누르면 콩 뛰어오른다
+    const fl = document.getElementById("see-float");
+    fl?.addEventListener("click", () => { fl.classList.remove("hop"); void fl.offsetWidth; fl.classList.add("hop"); });
+    fl?.addEventListener("animationend", (e) => { if (e.animationName === "see-hop") fl.classList.remove("hop"); });
     document.querySelectorAll("[data-q]").forEach((b) => b.addEventListener("click", () => go(b.dataset.q)));
   })();
 </script>

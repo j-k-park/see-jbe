@@ -42,6 +42,7 @@
     stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
     micOff: '<path d="M9 9V6a3 3 0 0 1 6 0v3"/><path d="M15 12.5V13a3 3 0 0 1-5.1 2.1"/><path d="M5 11a7 7 0 0 0 10.9 5.8M19 11a7 7 0 0 1-.6 2.8"/><path d="M12 18v3M9 21h6M4 4l16 16"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
   };
   const icon = (name, extra = "") =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name] || ""}</svg>`;
@@ -66,7 +67,7 @@
         <div class="util-links">
           <a href="https://www.jbe.go.kr/" target="_blank" rel="noopener">전북특별자치도교육청</a>
           <a href="https://www.jbe.go.kr/special/" target="_blank" rel="noopener">특수교육지원센터</a>
-          <a href="https://www.nise.go.kr/onmam/front/main.do" target="_blank" rel="noopener">장애자녀 부모지원(온맘)</a>
+          <a href="https://www.nise.go.kr/onmam/front/index.do" target="_blank" rel="noopener">장애자녀 부모지원(온맘)</a>
         </div>
         <div class="util-user" id="util-user"></div>
       </div></div>
@@ -104,7 +105,7 @@
           <div>
             <img src="assets/img/jbe-logo-white.png" alt="전북특별자치도교육청 JEONBUK STATE OFFICE OF EDUCATION" width="640" height="116">
             <address>(55065) 전북특별자치도 전주시 완산구 홍산로 111 전북특별자치도교육청<br>
-            대표전화 063-1396 (평일 9:00~18:00) · <span style="display:inline-block">정책국 미래교육과 AI·디지털 담당 장학사 박정교</span></address>
+            대표전화 063-239-3691 (평일 9:00~18:00) · <span style="display:inline-block">정책국 미래교육과 AI·디지털 담당 장학사 박정교</span> · <span style="display:inline-block">교육국 유초등특수교육과 장학사 이영미</span></address>
           </div>
           <div class="foot-links">
             <a href="https://www.jbe.go.kr/" target="_blank" rel="noopener">교육청 누리집</a>
@@ -361,7 +362,7 @@
     setTimeout(once, 2500);
   }
 
-  window.SEE = { icon, esc, SEE_LOGO, STEPS, md, mdToBlocks, saveAs, saveCsv, saveButtons, toast, today };
+  window.SEE = { icon, esc, SEE_LOGO, STEPS, md, mdToBlocks, saveAs, saveCsv, saveButtons, toast, today, blocksToHtml };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderChrome);
   else renderChrome();

@@ -11,6 +11,8 @@
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/art.css">
+<link rel="preload" href="assets/img/vision-motion.svg" as="fetch" type="image/svg+xml" crossorigin>
 </head>
 <body data-page="home">
 <div id="site-head"></div>
@@ -49,6 +51,8 @@
         </div>
         <div class="stage">
           <div class="see-float" id="see-float"><img src="assets/img/see-concept.jpg" alt="말풍선 모양의 SEE 구름 로고" width="600" height="492"></div>
+          <!-- SEE 구름 양옆에서 반갑게 손 흔드는 유치원 아이들(assets/js/art.js) -->
+          <div class="hero-kids" aria-hidden="true"><div data-art="kid-girl"></div><div data-art="kid-boy"></div></div>
           <!-- 비전 영상: 접속 2초 뒤 SEE 자리에서 재생(소리 끔으로 시작), 끝나면 다시 SEE. 멈추면 '이어서 재생 / SEE 보기' 선택 -->
           <div class="vv" id="vv" hidden>
             <video id="vv-video" playsinline preload="none" aria-label="살아가는 힘을 키우는 전북교육 비전 영상"></video>
@@ -89,7 +93,8 @@
 
   <section class="section">
     <div class="wrap">
-      <div class="sec-head">
+      <div class="sec-head has-guide">
+        <div class="guide-teacher" data-art="teacher" aria-hidden="true"></div>
         <div>
           <span class="eyebrow">5단계 길잡이</span>
           <h2>지금 우리 아이에게 필요한 단계부터 시작하세요</h2>
@@ -134,9 +139,12 @@
   <section class="section alt">
     <div class="wrap">
       <div class="sec-head">
-        <div>
-          <span class="eyebrow">전북 특수교육 한눈에</span>
-          <h2>가까운 곳에 도움이 있습니다</h2>
+        <div class="sec-head-main">
+          <div>
+            <span class="eyebrow">전북 특수교육 한눈에</span>
+            <h2>가까운 곳에 도움이 있습니다</h2>
+          </div>
+          <div class="help-kid" data-art="help" aria-hidden="true"></div>
         </div>
         <a class="btn btn-line btn-sm" href="step5.html">지도에서 보기</a>
       </div>
@@ -186,6 +194,7 @@
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/site.js"></script>
 <script src="assets/js/voice.js"></script>
+<script src="assets/js/art.js"></script>
 <script>
   (function () {
     const go = (q, byVoice) => { location.href = "chat.html?q=" + encodeURIComponent(q) + (byVoice ? "&v=1" : ""); };
@@ -205,6 +214,8 @@
       const svg = el.querySelector("svg"), btn = el.querySelector(".vm-toggle");
       const set = (still) => {
         svg.classList.toggle("still", still);
+        svg.classList.toggle("play", !still); // 기기의 '동작 줄이기' 설정과 상관없이 처음부터 움직이게
+        document.documentElement.classList.toggle("mo-still", still); // 구름·아이들·선생님 그림 움직임도 함께 멈춤/재생
         btn.setAttribute("aria-pressed", String(still));
         btn.title = still ? "움직임 다시 재생" : "움직임 멈추기";
         btn.setAttribute("aria-label", btn.title);
@@ -310,8 +321,7 @@
       $("vv-replay").addEventListener("click", () => play(true));
       soundUi();
       fullUi();
-      // '동작 줄이기' 설정이면 자동 재생하지 않고 단추만
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { $("vv-replay").hidden = false; return; }
+      // 기기의 '동작 줄이기' 설정과 상관없이 모든 브라우저에서 한 번 자동 재생(끝나면 SEE 구름과 아이들 그림, '비전 영상 보기' 단추)
       v.preload = "auto";
       v.src = SRC; // SEE가 보이는 2초 동안 미리 받아 둔다
       setTimeout(() => play(true), 2000);

@@ -8,6 +8,7 @@
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/art.css">
 </head>
 <body data-page="library">
 <div id="site-head"></div>
@@ -39,7 +40,9 @@
 <div id="site-foot"></div>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/art.js"></script>
 <script src="assets/js/procedure.js"></script>
+<script src="assets/js/voice.js"></script>
 <script>
   (function () {
     const { esc, icon } = SEE;
@@ -89,26 +92,128 @@
         <span class="tag ${d.tag[0]}" style="align-self:flex-start">${d.tag[1]}</span>
         <h3>${esc(d.t)}</h3><p>${esc(d.d)}</p>
         <div class="acts">
-          ${d.href ? `<a class="btn btn-navy btn-sm" href="${d.href}">${icon("arrow")}기록지 만들기</a>` : SEE.saveButtons(d.id)}
+          ${d.href ? `<a class="btn btn-navy btn-sm" href="${d.href}">${icon("arrow")}기록지 만들기</a>` :
+            `<button class="btn btn-navy btn-sm" type="button" data-view="${d.id}" aria-haspopup="dialog">${icon("eye")}화면보기</button>` + SEE.saveButtons(d.id)}
           ${d.csv ? `<button class="btn btn-line btn-sm" type="button" data-csv="${d.id}">${icon("download")}CSV</button>` : ""}
         </div>
       </article>`).join("");
 
     const byId = Object.fromEntries(DOCS.map((d) => [d.id, d]));
-    document.getElementById("docs").addEventListener("click", async (e) => {
+    const blocksFor = async (d) => {
+      if (d.build) return d.build();
+      const note = d.id === "therapy" ? "출처: 전북특별자치도교육청 치료지원 가맹점 현황(2026. 5. 1. 기준). 가맹점은 수시로 바뀌니 이용 전 기관에 확인하세요." : "출처: 전북특별자치도교육청 특수교육지원센터, 유치원알리미 정보공시, 각 교육지원청 누리집 (2026년 9월 확인)";
+      return [{ table: { head: d.head, rows: await d.rows() } }, { note }];
+    };
+
+    /* ---------- 화면보기: 팝업으로 바로 보고, 음성으로 듣기(시각장애인·저시력 이용자) ---------- */
+    // 읽기용 글: 표는 한 줄씩 "항목 값, 항목 값"으로 읽는다
+    const readText = (title, blocks) => {
+      const out = [title + "."];
+      for (const b of blocks) {
+        if (b.h) out.push(b.h + ".");
+        if (b.p) out.push(b.p);
+        if (b.note) out.push("참고. " + b.note);
+        if (b.ul) b.ul.forEach((x) => out.push(x));
+        if (b.ol) b.ol.forEach((x, i) => out.push(`${i + 1}. ${x}`));
+        if (b.table) b.table.rows.forEach((r) => out.push(r.map((c, i) => `${b.table.head[i]} ${c}`).filter((x) => x.trim()).join(", ")));
+      }
+      return out.join("\n");
+    };
+    const FS_KEY = "see.view.fs";
+    let fs = 1;
+    try { fs = Math.min(1.6, Math.max(0.9, Number(localStorage.getItem(FS_KEY)) || 1)); } catch {}
+    const view = document.createElement("dialog");
+    view.className = "doc-view";
+    view.setAttribute("aria-labelledby", "dv-title");
+    view.innerHTML = `
+      <div class="dv-head"><div><span class="dv-tag"></span><h2 id="dv-title"></h2></div>
+        <button type="button" class="dv-x" aria-label="창 닫기">${icon("close")}</button></div>
+      <div class="dv-bar">
+        <button type="button" class="btn btn-sm dv-listen" aria-pressed="false"></button>
+        <span class="dv-status" role="status" aria-live="polite"></span>
+        <span class="dv-fs" role="group" aria-label="글자 크기">
+          <button type="button" class="btn btn-line btn-sm" data-fs="-1" aria-label="글자 작게">가<small>-</small></button>
+          <button type="button" class="btn btn-line btn-sm" data-fs="1" aria-label="글자 크게">가<small>+</small></button>
+        </span>
+      </div>
+      <div class="dv-body" tabindex="0"></div>
+      <div class="dv-foot"><span class="dv-save"></span><button type="button" class="btn btn-navy btn-sm dv-close">닫기</button></div>`;
+    document.body.appendChild(view);
+    const $v = (sel) => view.querySelector(sel);
+    const voice = SEE.voice;
+    let cur = null, speaking = false;
+    const setListen = (on, msg) => {
+      speaking = on;
+      const b = $v(".dv-listen");
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+      b.innerHTML = on ? `${icon("stop")}읽기 멈추기` : `${icon("sound")}음성으로 듣기`;
+      $v(".dv-status").textContent = msg ?? (on ? "읽어 드리는 중이에요…" : "");
+    };
+    const applyFs = () => { $v(".dv-body").style.setProperty("--fs", fs); };
+    const stopRead = () => { if (speaking) { voice?.stop(); setListen(false); } };
+
+    async function openView(d) {
+      stopRead();
+      cur = { d, blocks: null };
+      $v(".dv-tag").className = `dv-tag tag ${d.tag[0]}`;
+      $v(".dv-tag").textContent = d.tag[1];
+      $v("#dv-title").textContent = d.t;
+      $v(".dv-body").innerHTML = `<p class="dv-wait">내용을 불러오는 중입니다…</p>`;
+      $v(".dv-save").innerHTML = SEE.saveButtons(d.id) + (d.csv ? `<button class="btn btn-line btn-sm" type="button" data-csv="${d.id}">${icon("download")}CSV</button>` : "");
+      setListen(false, voice?.canSpeak ? "" : "이 브라우저는 음성 읽기를 지원하지 않아요.");
+      $v(".dv-listen").disabled = !voice?.canSpeak;
+      applyFs();
+      if (!view.open) view.showModal();
+      $v(".dv-body").scrollTop = 0;
+      try {
+        const blocks = await blocksFor(d);
+        if (cur?.d !== d) return;
+        cur.blocks = blocks;
+        $v(".dv-body").innerHTML = `<p class="dv-lead">${esc(d.d)}</p>` + SEE.blocksToHtml(blocks).replace(/<table>/g, '<div class="dv-table"><table>').replace(/<\/table>/g, "</table></div>");
+      } catch {
+        $v(".dv-body").innerHTML = `<p>내용을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</p>`;
+      }
+      $v(".dv-x").focus();
+    }
+
+    $v(".dv-listen").addEventListener("click", () => {
+      if (!voice || !cur?.blocks) return;
+      if (speaking) return stopRead();
+      voice.unlock?.(); // 휴대폰은 누른 순간에만 소리를 낼 수 있다
+      setListen(true);
+      voice.speak(readText(cur.d.t, cur.blocks), (r) => {
+        if (r === "stopped") return;
+        setListen(false, r === "ok" ? "다 읽었어요. 다시 들으려면 '음성으로 듣기'를 누르세요." : "소리를 낼 수 없어요. 기기의 소리(음량)와 음성 설정을 확인해 주세요.");
+      }, { kind: "library" }); // 자료실 공개 자료: 로그인 없이 자연스러운 목소리(서버에 만들어 둔 음성을 다시 씀)
+    });
+    view.querySelectorAll("[data-fs]").forEach((b) => b.addEventListener("click", () => {
+      fs = Math.round(Math.min(1.6, Math.max(0.9, fs + Number(b.dataset.fs) * 0.1)) * 10) / 10;
+      applyFs();
+      try { localStorage.setItem(FS_KEY, String(fs)); } catch {}
+    }));
+    const close = () => { stopRead(); view.close(); };
+    $v(".dv-x").addEventListener("click", close);
+    $v(".dv-close").addEventListener("click", close);
+    view.addEventListener("close", stopRead); // Esc로 닫아도 읽기를 멈춘다
+    view.addEventListener("click", (e) => { if (e.target === view) close(); }); // 바깥(어두운 곳)을 누르면 닫기
+
+    const onAct = async (e) => {
+      const v = e.target.closest("[data-view]");
       const s = e.target.closest("[data-save]");
       const c = e.target.closest("[data-csv]");
+      if (v) return openView(byId[v.dataset.view]);
       if (s) {
         const d = byId[s.dataset.doc];
-        const note = d.id === "therapy" ? "출처: 전북특별자치도교육청 치료지원 가맹점 현황(2026. 5. 1. 기준). 가맹점은 수시로 바뀌니 이용 전 기관에 확인하세요." : "출처: 전북특별자치도교육청 특수교육지원센터, 유치원알리미 정보공시, 각 교육지원청 누리집 (2026년 9월 확인)";
-        const blocks = d.build ? d.build() : [{ table: { head: d.head, rows: await d.rows() } }, { note }];
-        SEE.saveAs(s.dataset.save, d.t, blocks);
+        SEE.saveAs(s.dataset.save, d.t, d === cur?.d && cur.blocks ? cur.blocks : await blocksFor(d));
       }
       if (c) {
         const d = byId[c.dataset.csv];
         SEE.saveCsv(d.t, d.head, await d.rows());
       }
-    });
+    };
+    document.getElementById("docs").addEventListener("click", onAct);
+    view.addEventListener("click", onAct);
   })();
 </script>
 </body>

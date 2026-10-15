@@ -1,7 +1,8 @@
 /* SEE 음성 기능 — 선도학교 소통지원 누리집(leading.jbedu.ai.kr) AI 도우미에서 휴대폰·PC 모두 잘 작동한 방식을 옮김
    - 말로 묻기: 브라우저 음성 인식(크롬·엣지·사파리, ko-KR). 마이크 버튼을 누른 순간 바로 시작(휴대폰은 누른 순간에만 허용)
      말이 끝나면 문장부호를 붙여 자동으로 보내고, 답변은 자동으로 읽어 준다
-   - 답변 읽어 주기: /api/tts(구글 클라우드 자연스러운 한국어 음성, MP3). 서버가 fallback이라 하면 브라우저 음성으로
+   - 답변 읽어 주기: /api/tts(구글 클라우드 자연스러운 한국어 음성, MP3). 로그인하지 않아도 쓸 수 있고(하루 상한),
+     자료실 공개 자료는 kind "library"로 보내 서버에 만들어 둔 음성을 다시 쓴다. 서버가 fallback이라 하면 브라우저 음성으로
    말소리와 답변 글은 저장하지 않는다. */
 (function () {
   "use strict";
@@ -165,23 +166,24 @@
     release = null;
   }
 
-  async function fetchAudio(text) {
+  async function fetchAudio(text, kind) {
     if (browserOnly) return null;
-    if (cache.has(text)) return cache.get(text);
+    const ck = (kind || "") + "|" + text;
+    if (cache.has(ck)) return cache.get(ck);
     const p = (async () => {
       const tk = window.SEEAuth?.token?.();
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "content-type": "application/json", ...(tk ? { Authorization: "Bearer " + tk } : {}) },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify(kind ? { text, kind } : { text }),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j.audio) { if (j.fallback || res.status === 401) browserOnly = true; return null; }
       const bin = Uint8Array.from(atob(j.audio), (c) => c.charCodeAt(0));
       return URL.createObjectURL(new Blob([bin], { type: "audio/mpeg" }));
     })().catch(() => null);
-    cache.set(text, p);
-    p.then((u) => { if (!u) cache.delete(text); });
+    cache.set(ck, p);
+    p.then((u) => { if (!u) cache.delete(ck); });
     return p;
   }
 
@@ -216,16 +218,16 @@
     });
   }
 
-  /** 읽어 주기. onDone(결과: "ok" | "stopped" | "blocked" | "error") */
-  async function speak(src, onDone) {
+  /** 읽어 주기. onDone(결과: "ok" | "stopped" | "blocked" | "error"), opt.kind: "library"(자료실 공개 자료) */
+  async function speak(src, onDone, opt = {}) {
     stop();
     const my = token;
     const parts = chunks(speechText(src));
     let result = parts.length ? "ok" : "error";
     for (let i = 0; i < parts.length; i++) {
       if (my !== token) { result = "stopped"; break; }
-      const url = await fetchAudio(parts[i]);
-      if (parts[i + 1]) fetchAudio(parts[i + 1]); // 다음 조각 미리 받기
+      const url = await fetchAudio(parts[i], opt.kind);
+      if (parts[i + 1]) fetchAudio(parts[i + 1], opt.kind); // 다음 조각 미리 받기
       if (my !== token) { result = "stopped"; break; }
       // 구글 음성을 못 받으면 남은 글은 브라우저 음성으로(크롬은 긴 글을 끊어 먹어 문장별로)
       const r = url ? await playUrl(url) : await (async () => {

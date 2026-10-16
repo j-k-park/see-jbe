@@ -157,6 +157,10 @@ ul, ol { margin: 0; padding: 0; }
 .vm-toggle svg { width: 13px; height: 13px; }
 .hero-copy h1 { font-size: clamp(30px, 4.4vw, 46px); color: var(--navy); }
 .hero-copy h1 em { font-style: normal; color: var(--orange); }
+/* '혼자 고민하지 마세요'에 형광펜(선도학교 누리집과 같은 노란 띠) — 들어오면 1초 뒤 왼쪽에서 오른쪽으로 그어진다 */
+.hero-copy h1 em { background: linear-gradient(transparent 66%, rgba(255, 205, 27, .5) 66% 92%, transparent 92%) no-repeat 0 0 / 100% 100%; -webkit-box-decoration-break: clone; box-decoration-break: clone; animation: hl-mark .8s cubic-bezier(.6, 0, .2, 1) 1s backwards; }
+@keyframes hl-mark { from { background-size: 0% 100%; } }
+@media (prefers-reduced-motion: reduce) { .hero-copy h1 em { animation: none; } }
 .hero-copy .lead { font-size: 18px; color: var(--ink-2); }
 .ask-box { display: flex; gap: 8px; background: #fff; border: 2px solid var(--navy); border-radius: 999px; padding: 6px 6px 6px 20px; align-items: center; }
 .ask-box input { flex: 1; min-width: 0; border: 0; outline: 0; font-size: 16px; padding: 8px 0; background: transparent; }

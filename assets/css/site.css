@@ -694,12 +694,11 @@ html.mo-still .fab svg, html.mo-still .fab.greet svg, html.mo-still .btn-ai.gree
   .fab .t { display: none; }
   .test-card dl, .detail dl { grid-template-columns: minmax(0, 1fr); }
   .test-card dt, .detail dt { margin-top: 4px; }
-  .util-links a:nth-child(n+3) { display: none; }
   /* 로그인하면 이름·로그아웃이 둘째 줄로 내려갈 수 있다 — 두 줄이어도 줄 사이가 벌어지지 않게 위아래 여백을 줄인다 */
-  .util .wrap { gap: 0 12px; padding-block: 4px; }
-  .util-links { gap: 0 14px; }
+  .util .wrap { gap: 0 14px; padding-block: 4px; justify-content: flex-start; }
+  .util-links { display: contents; } /* 링크와 로그인 단추를 한 줄 흐름으로 — '온맘' 옆 빈자리에 로그인이 들어가 세 줄이 되지 않게 */
   .util-links a, .util-user a { padding: 5px 0; }
-  .util-user { gap: 6px; white-space: nowrap; }
+  .util-user { gap: 6px; white-space: nowrap; margin-left: auto; }
   .util-user button { padding: 3px 12px; }
   .t-table { min-width: 0; }
   .t-table thead { display: none; }

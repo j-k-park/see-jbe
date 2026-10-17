@@ -200,6 +200,29 @@
     const go = (q, byVoice) => { location.href = "chat.html?q=" + encodeURIComponent(q) + (byVoice ? "&v=1" : ""); };
     // 마이크로 말하면 바로 AI 상담으로 넘어가 묻고, 답변을 읽어 준다
     SEE.voice?.bindMic(document.getElementById("hero-mic"), document.getElementById("hero-q"), (t) => go(t, true));
+    // 질문창 예시: 5초마다 다른 예시로(입력하거나 말하는 중, 움직임 멈춤을 고른 경우에는 그대로)
+    (function rotateExamples() {
+      const q = document.getElementById("hero-q"), mic = document.getElementById("hero-mic");
+      const EX = [
+        "예) 세 돌인데 말이 늦어요. 어디서 상담하나요?",
+        "예) 특수교육대상자 진단·평가는 어떻게 신청하나요?",
+        "예) 전주에 특수학급이 있는 유치원은 어디예요?",
+        "예) 선별검사에서 '심화평가 권고'가 나왔어요. 다음엔 뭘 하죠?",
+        "예) 눈을 잘 안 맞추고 이름을 불러도 반응이 적어요.",
+        "예) 병원 진단 없이도 특수교육 지원을 받을 수 있나요?",
+        "예) 어린이집에 다니는데 순회교육을 받을 수 있나요?",
+        "예) 치료지원(꿈활짝카드)은 누가 받을 수 있나요?",
+        "예) 집에서 할 수 있는 언어 발달 놀이를 알려 주세요.",
+        "예) 통학 지원이나 보조 인력도 받을 수 있나요?",
+      ];
+      let i = 0;
+      setInterval(() => {
+        const busy = q.value || document.activeElement === q || mic?.classList.contains("listening");
+        if (busy || document.hidden || document.documentElement.classList.contains("mo-still")) return;
+        q.classList.add("ph-fade");
+        setTimeout(() => { i = (i + 1) % EX.length; q.placeholder = EX[i]; q.classList.remove("ph-fade"); }, 350);
+      }, 5000);
+    })();
     document.getElementById("hero-ask").addEventListener("submit", (e) => {
       e.preventDefault();
       const q = document.getElementById("hero-q").value.trim();

@@ -9,6 +9,7 @@
   const PAGES = {
     step1: ["step1.html", "1단계 발달 정보"], step2: ["step2.html", "2단계 선별검사"], step3: ["step3.html", "3단계 결과별 가이드"],
     step4: ["step4.html", "4단계 선정 절차·지원"], step5: ["step5.html", "5단계 기관 찾기"], library: ["library.html", "자료실"], faq: ["faq.html", "자주 묻는 질문"],
+    board: ["board.html", "담당자와 소통"],
   };
   const TYPE_NAME = { kinder: "특수학급 유치원", special: "특수학교", center: "특수교육지원센터", daycare: "어린이집" };
 

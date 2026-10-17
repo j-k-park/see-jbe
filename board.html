@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>담당자와 소통 | SEE 우리 아이 성장 길잡이</title>
+<meta name="description" content="특수교육 담당자에게 궁금한 점과 의견을 남기고 답변을 받는 게시판. 비밀글, 말로 쓰기, AI 제목·내용 정리를 지원합니다.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/art.css">
+</head>
+<body data-page="board">
+<div id="site-head"></div>
+<main id="main">
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="현재 위치"><a href="index.html">홈</a><span>›</span><span>담당자와 소통</span></nav>
+      <h1>담당자와 소통</h1>
+      <p class="lead">궁금한 점이나 바라는 점을 남겨 주시면 특수교육 담당자가 답변해 드립니다. 글쓰기가 힘드시면 말로 남겨 주세요. AI가 제목과 내용을 정리해 드려요.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap board">
+      <div class="board-top">
+        <div class="b-filter" role="group" aria-label="글 고르기">
+          <button type="button" data-filter="all" aria-pressed="true">전체</button>
+          <button type="button" data-filter="wait" aria-pressed="false">답변 대기</button>
+          <button type="button" data-filter="mine" aria-pressed="false">내 글</button>
+        </div>
+        <p class="board-count" id="b-count" aria-live="polite"></p>
+        <button type="button" class="btn btn-navy" id="b-notice" hidden><span data-icon="info"></span>공지 쓰기</button>
+        <button type="button" class="btn btn-orange" id="b-open"><span data-icon="pen"></span>의견 남기기</button>
+      </div>
+
+      <!-- 관리자 메뉴: 저장소(구글 드라이브) · 관리자와 현장교사 지원단 -->
+      <div class="card b-admin" id="drive" hidden>
+        <div class="b-admin-head"><span class="tag navy">관리자 메뉴</span><h2>저장소 · 구글 드라이브</h2></div>
+        <p class="b-admin-state" id="b-drive-state">확인하는 중…</p>
+        <div class="b-admin-acts" id="b-drive-acts"></div>
+        <div class="b-roles" id="b-roles">
+          <div class="b-admin-head"><h2>관리자와 현장교사 지원단</h2><span class="b-role-help">최고관리자·협력관리자는 같은 권한(모든 권한) · 현장교사 지원단은 비밀글을 포함한 모든 글의 답변·고치기와 공지 쓰기</span></div>
+          <p class="b-role-note">최고·협력관리자로 지정한 분께는 구글 드라이브의 거점 폴더('유아특수 웹앱')도 '편집자'로 공유해 주세요. 그래야 드라이브에서도 자료를 고치고 지울 수 있어요. 역할을 뺄 때는 공유도 함께 거둬 주세요.</p>
+          <form class="b-role-add" id="b-role-add">
+            <label class="sr-only" for="br-email">구글 계정(이메일)</label><input id="br-email" type="email" placeholder="구글 계정 이메일" autocomplete="off" required>
+            <label class="sr-only" for="br-name">이름(선택)</label><input id="br-name" maxlength="30" placeholder="이름(선택)">
+            <label class="sr-only" for="br-role">역할</label><select id="br-role"></select>
+            <button type="submit" class="btn btn-navy btn-sm">지정</button>
+          </form>
+          <ul class="b-members" id="b-members"></ul>
+          <div class="b-apps" id="b-apps"></div>
+        </div>
+      </div>
+
+      <!-- 로그인 안내 -->
+      <div class="card b-login" id="b-login" hidden>
+        <h2>로그인하고 의견을 남겨 주세요</h2>
+        <p>글쓴이 확인과 비밀글 보호를 위해 구글 계정으로 로그인합니다. 다른 분께는 이름 일부만 가려서 보여요(예: 박*교).</p>
+        <div class="b-gbtn" id="b-gbtn"></div>
+        <p class="src" id="b-login-msg"></p>
+      </div>
+
+      <!-- 글쓰기 -->
+      <form class="card b-write" id="b-write" hidden novalidate>
+        <div class="b-write-head">
+          <h2 id="b-write-title">의견 남기기</h2>
+          <button type="button" class="b-x" id="b-close" aria-label="글쓰기 닫기"><span data-icon="close"></span></button>
+        </div>
+
+        <div class="b-voice" id="b-voice">
+          <div class="b-voice-text">
+            <b>말로 남기기</b>
+            <span>담당자에게 하고 싶은 말을 편하게 말씀해 주세요. 말을 마치고 잠시 기다리면 AI가 제목과 내용을 자세히 정리해 드려요.</span>
+          </div>
+          <button type="button" class="b-talk" id="b-talk" aria-pressed="false"></button>
+          <div class="b-live" id="b-live" hidden>
+            <p class="b-live-text" id="b-live-text"></p>
+            <div class="b-live-foot">
+              <span class="b-live-hint" id="b-live-hint">듣고 있어요. 말을 마치고 4초쯤 기다리면 자동으로 정리해요.</span>
+              <button type="button" class="btn btn-navy btn-sm" id="b-talk-done">다 말했어요</button>
+            </div>
+          </div>
+          <p class="b-ai" id="b-ai" role="status" hidden></p>
+        </div>
+
+        <div class="b-or"><span>직접 쓰거나, 정리된 글을 확인하고 고쳐 주세요</span></div>
+
+        <label class="b-label" for="b-title">제목</label>
+        <div class="b-field">
+          <input id="b-title" maxlength="100" placeholder="예) 진단·평가는 언제 신청하면 되나요?" autocomplete="off">
+          <button type="button" class="mic" id="b-title-mic"></button>
+        </div>
+        <label class="b-label" for="b-content">내용</label>
+        <div class="b-field">
+          <textarea id="b-content" rows="9" maxlength="5000" placeholder="아이의 나이와 지금 모습, 궁금한 점이나 바라는 점을 적어 주세요. 아이 이름·전화번호 같은 개인정보는 적지 말아 주세요."></textarea>
+          <button type="button" class="mic" id="b-content-mic"></button>
+        </div>
+        <div class="b-opts">
+          <label class="chk b-secret" id="b-secret-wrap"><input type="checkbox" id="b-secret"> <span><b>비밀글</b> · 제목만 보이고, 내용과 답변은 나와 담당자(장학사·현장교사 지원단)만 봐요</span></label>
+          <span class="b-len" id="b-len">0 / 5,000자</span>
+        </div>
+
+        <!-- 첨부: 사진·동영상·문서(담당자에게만 제출) + 링크 -->
+        <div class="b-attach">
+          <div class="b-attach-head"><b>첨부</b><span>사진·동영상·문서는 담당자(장학사·현장교사 지원단)에게만 전달돼요. 공개글이어도 다른 분께는 보이지 않아요.</span></div>
+          <div class="b-attach-btns">
+            <button type="button" class="btn btn-line btn-sm" data-pick="image"><span data-icon="camera"></span>사진</button>
+            <button type="button" class="btn btn-line btn-sm" data-pick="video"><span data-icon="video"></span>동영상</button>
+            <button type="button" class="btn btn-line btn-sm" data-pick="doc"><span data-icon="file"></span>문서<small>한글·PDF·워드 등</small></button>
+            <button type="button" class="btn btn-line btn-sm" id="b-link-add"><span data-icon="link"></span>링크</button>
+          </div>
+          <input type="file" id="b-pick-image" accept="image/*" multiple hidden>
+          <input type="file" id="b-pick-video" accept="video/*" multiple hidden>
+          <input type="file" id="b-pick-doc" accept=".pdf,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp,.csv" multiple hidden>
+          <p class="b-attach-off" id="b-attach-off" hidden>사진·동영상·문서 올리기는 담당자가 저장소(구글 드라이브)를 연결한 뒤 쓸 수 있어요. 링크는 지금도 남길 수 있어요.</p>
+          <ul class="b-queue" id="b-queue" aria-label="올릴 첨부"></ul>
+          <div class="b-linkset" id="b-linkset"></div>
+        </div>
+        <div class="b-acts">
+          <button type="button" class="btn btn-line" id="b-polish"><span data-icon="spark"></span>AI로 다듬기</button>
+          <span class="b-sp"></span>
+          <button type="button" class="btn btn-line" id="b-cancel">취소</button>
+          <button type="submit" class="btn btn-navy" id="b-submit">확인하고 게시하기</button>
+        </div>
+      </form>
+
+      <ul class="b-list" id="b-list" aria-label="게시글 목록"></ul>
+      <p class="b-empty" id="b-empty" hidden></p>
+
+      <!-- 현장교사 지원단 신청(로그인한 일반 이용자) -->
+      <div class="card b-apply" id="b-apply" hidden>
+        <div><b>현장교사 지원단이신가요?</b><span>신청하시면 관리자가 확인한 뒤 답변과 공지 쓰기 권한을 드려요.</span></div>
+        <form class="b-apply-form" id="b-apply-form">
+          <label class="sr-only" for="ba-school">학교(기관)</label><input id="ba-school" maxlength="60" placeholder="학교(기관) 이름" required>
+          <label class="sr-only" for="ba-note">남길 말(선택)</label><input id="ba-note" maxlength="300" placeholder="남길 말(선택) 예) 유치원 특수학급 담당">
+          <button type="submit" class="btn btn-line btn-sm">신청하기</button>
+        </form>
+        <p class="b-apply-state" id="b-apply-state" hidden></p>
+      </div>
+
+      <div class="notice blue" style="margin-top:24px"><span data-icon="info"></span>
+        <p><strong>개인정보는 적지 말아 주세요.</strong> 아이 이름, 주민등록번호, 전화번호, 자세한 주소는 쓰지 않아도 답변을 받을 수 있어요. 급한 상담은 거주지 교육지원청 특수교육지원센터로 전화해 주세요(<a href="step5.html?type=center">연락처 보기</a>).</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog class="b-confirm" id="b-confirm" aria-labelledby="bc-head">
+  <div class="dlg-head"><h2 id="bc-head">이대로 게시할까요?</h2></div>
+  <div class="dlg-body">
+    <p class="b-c-kind" id="bc-kind"></p>
+    <h3 class="b-c-title" id="bc-title"></h3>
+    <div class="b-c-body" id="bc-body"></div>
+    <div class="b-c-more" id="bc-more"></div>
+    <ul class="b-queue b-progress" id="bc-progress" hidden></ul>
+  </div>
+  <div class="dlg-foot">
+    <button type="button" class="btn btn-line btn-sm" id="bc-edit">고치기</button>
+    <button type="button" class="btn btn-navy btn-sm" id="bc-ok">게시 승인</button>
+  </div>
+</dialog>
+
+<!-- 첨부 보기(사진·동영상·PDF) -->
+<dialog class="b-viewer" id="b-viewer" aria-labelledby="bv-title">
+  <div class="dlg-head"><h2 id="bv-title"></h2><button type="button" class="b-x" id="bv-close" aria-label="닫기"><span data-icon="close"></span></button></div>
+  <div class="b-viewer-body" id="bv-body"></div>
+</dialog>
+
+<div id="site-foot"></div>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/art.js"></script>
+<script src="assets/js/voice.js"></script>
+<script src="assets/js/board.js"></script>
+</body>
+</html>

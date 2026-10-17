@@ -43,6 +43,14 @@
     micOff: '<path d="M9 9V6a3 3 0 0 1 6 0v3"/><path d="M15 12.5V13a3 3 0 0 1-5.1 2.1"/><path d="M5 11a7 7 0 0 0 10.9 5.8M19 11a7 7 0 0 1-.6 2.8"/><path d="M12 18v3M9 21h6M4 4l16 16"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    pen: '<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m14 6 4 4"/>',
+    spark: '<path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7Z"/><path d="M19 3v4M17 5h4"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    reply: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/>',
+    camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/>',
+    video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
   };
   const icon = (name, extra = "") =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name] || ""}</svg>`;
@@ -87,6 +95,7 @@
           ${STEPS.map((s) => `<li><a href="${s.href}" style="--c:${s.c}" ${page === "step" + s.n ? 'aria-current="page"' : ""}><span class="n">${s.n}</span>${s.label}</a></li>`).join("")}
           <li><a href="library.html" ${page === "library" ? 'aria-current="page"' : ""}>자료실</a></li>
           <li><a href="faq.html" ${page === "faq" ? 'aria-current="page"' : ""}>자주 묻는 질문</a></li>
+          <li><a class="gnb-talk" href="board.html" ${page === "board" ? 'aria-current="page"' : ""}>담당자와 소통</a></li>
         </ul></div></nav>
       </header>`;
       const t = head.querySelector(".menu-toggle");
@@ -111,6 +120,7 @@
             <a href="https://www.jbe.go.kr/" target="_blank" rel="noopener">교육청 누리집</a>
             <a href="https://www.jbe.go.kr/special/" target="_blank" rel="noopener">특수교육지원센터</a>
             <a href="library.html">자료실</a>
+            <a href="board.html">담당자와 소통</a>
             <a href="privacy.html">개인정보 처리 안내</a>
           </div>
         </div>

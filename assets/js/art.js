@@ -706,6 +706,31 @@
         person("girl", { g, x: kidX, y: GY, s: KS, ex: "wonder", l: "down", r: "up", d: "-.2s" });
       return { vb: "0 0 460 250", body };
     },
+
+    /* 담당자와 소통: 휴대폰에 말로 남기는 엄마, 편지를 든 아이와 아빠 → 편지가 날아가 선생님(담당자)이 답장 */
+    board(g) {
+      const dadX = 96, kidX = 150, momX = 214, tX = 396;
+      const hold = meet(["dad", "r", dadX, 1], ["boy", "l", kidX, KS]);
+      const letter = (fill = "#fff") =>
+        `<rect x="-13" y="-9" width="26" height="18" rx="3" fill="${fill}" stroke="#f0a2b5" stroke-width="1.2"/>` +
+        `<path d="M-13,-8L0,2L13,-8" fill="none" stroke="#f0a2b5" stroke-width="1.2" stroke-linejoin="round"/>` +
+        `<path d="${HEART}" transform="translate(0 3) scale(.75)" fill="#ff7f97"/>`;
+      const waves = `<g class="ar-waves"><path d="M8,-6Q14,0 8,6" /><path d="M13,-11Q23,0 13,11"/><path d="M18,-16Q32,0 18,16"/></g>`;
+      const body =
+        glow(g, 300, 110, 150, "#fff4fa", 0.95) +
+        ground(g, "#fbe3ee", "#f6d2e2") +
+        cloud(330, 44, 0.75, "#fff", 0.95, "ar-drift", "-6s") +
+        `<path class="ar-dash" d="M250,92C290,52 330,52 362,86" fill="none" stroke="#f3b3c8" stroke-width="2.4" stroke-dasharray="5 7" stroke-linecap="round"/>` +
+        at(306, 64, letter(), "ar-fly") +
+        at(tX - 30, GY - 186, bubble(40, 32, "#effaf9", "#a6e0dd", `<path d="M-8,0L-2,6L9,-6" fill="none" stroke="#00a9a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`), "ar-pop", "-1.6s") +
+        spark(268, 40, 0.8, "#ffc94d", "-.3s") + spark(440, 120, 0.7, "#ff9bb3", "-1.2s") + heart(60, 70, 1.1, "#ffb3c5", "ar-float", "-1s") +
+        person("dad", { g, x: dadX, y: GY, ex: "smile", l: "down", r: reach("dad", "r", dadX, GY, 1, hold[0], hold[1]), d: "-.9s" }) +
+        person("boy", { g, x: kidX, y: GY, s: KS, ex: "open", l: reach("boy", "l", kidX, GY, KS, hold[0], hold[1]), r: { a: 100, b: 66, fa: "ar-wave-slow", k: 1.2 }, propR: `<g transform="translate(0 -10)">${letter("#fffaf2")}</g>`, d: "-.4s" }) +
+        at(momX + 30, GY - 160, `<g stroke="#ff8fab" stroke-width="2" fill="none" stroke-linecap="round">${waves}</g>`) +
+        person("mom", { g, x: momX, y: GY, ex: "talk", l: "down", r: reach("mom", "r", momX, GY, 1, momX + 10, GY - 148), propR: PROP.phone, d: "-1.3s" }) +
+        person("teacher", { g, x: tX, y: GY, ex: "open", l: { a: 64, b: 30, fa: "ar-wave-slow" }, r: "down", d: "-.6s" });
+      return { vb: "0 0 460 250", body };
+    },
   };
 
   /* ---------- 그리기·붙이기 ---------- */

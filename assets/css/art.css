@@ -83,6 +83,18 @@
 .ar .ar-chk3 { animation-delay: 1.2s; }
 
 @keyframes ar-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+/* 담당자와 소통: 편지가 날아가고, 말소리 물결이 퍼진다 */
+.ar .ar-fly { animation: ar-fly 3.6s ease-in-out infinite; }
+@keyframes ar-fly {
+  0% { transform: translate(-56px, 28px) rotate(-12deg) scale(.7); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  50% { transform: translate(0, -6px) rotate(6deg) scale(1); }
+  100% { transform: translate(56px, 24px) rotate(12deg) scale(.8); opacity: 0; }
+}
+.ar .ar-waves path { animation: ar-wave-pulse 1.4s ease-out infinite; }
+.ar .ar-waves path:nth-child(2) { animation-delay: .2s; }
+.ar .ar-waves path:nth-child(3) { animation-delay: .4s; }
+@keyframes ar-wave-pulse { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes ar-twinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
 @keyframes ar-pop { 0%, 6% { opacity: 0; transform: scale(.4); } 14%, 70% { opacity: 1; transform: scale(1); } 78%, 100% { opacity: 0; transform: scale(.85); } }
 @keyframes ar-popq { 0%, 100% { transform: scale(1) rotate(-4deg); } 50% { transform: scale(1.08) rotate(4deg); } }
@@ -143,6 +155,7 @@ body[data-page="step4"] .page-hero { --ph1: #fbf9ff; --ph2: #eef4fe; --ph3: #dfe
 body[data-page="step5"] .page-hero { --ph1: #fdf9ff; --ph2: #f2eefc; --ph3: #e7e1f8; --ph-line: #ddd6f1; }
 body[data-page="library"] .page-hero { --ph1: #fbfcf2; --ph2: #f0f6e4; --ph3: #e2efd4; --ph-line: #d8e7c8; }
 body[data-page="faq"] .page-hero { --ph1: #fffaf2; --ph2: #fff1e2; --ph3: #ffe5cf; --ph-line: #f5dbc3; }
+body[data-page="board"] .page-hero { --ph1: #fff8fb; --ph2: #fdeef5; --ph3: #f9e1ec; --ph-line: #f1d5e2; }
 
 @media (max-width: 900px) {
   .hero-kids { bottom: 4px; }

@@ -1,8 +1,11 @@
-/* 구글 로그인(Google Identity Services) — AI 상담에서만 사용
-   구글이 발급한 ID 토큰을 세션 동안만 보관하고, 서버가 매 요청마다 서명을 검증한다. */
+/* 구글 로그인(Google Identity Services) — AI 상담·담당자와 소통에서 사용
+   구글이 발급한 ID 토큰을 세션 동안만 보관하고, 서버가 매 요청마다 서명을 검증한다.
+   로그인하면 부를 이름(김하늘 선생님·박정교 장학사님)을 /api/me에서 받아 위쪽에 보이고, 처음 한 번 환영 인사를 띄운다. */
 (function () {
   "use strict";
   const KEY = "see.auth";
+  const ME = "see.me"; // {email, call, greet, hint, role} — 이 탭 동안만
+  const WELCOME = "see.welcome"; // 로그인 직후 표시(/api/google-callback이 남긴다)
   let config = null;
   let gisLoading = null;
 
@@ -28,6 +31,66 @@
       v ? sessionStorage.setItem(KEY, JSON.stringify(v)) : sessionStorage.removeItem(KEY);
     } catch {}
   };
+  const forget = (...keys) => { try { keys.forEach((k) => sessionStorage.removeItem(k)); } catch {} };
+
+  /* 부를 이름과 환영 인사(역할은 서버만 알기 때문에 한 번 받아 둔다) */
+  const readMe = (u) => {
+    try {
+      const m = JSON.parse(sessionStorage.getItem(ME) || "null");
+      return m && u && m.email === u.email ? m : null;
+    } catch {
+      return null;
+    }
+  };
+  let meLoading = null;
+  function loadMe(u) {
+    const cached = readMe(u);
+    if (cached) return Promise.resolve(cached);
+    meLoading ||= fetch("/api/me", { headers: { Authorization: "Bearer " + u.token }, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => {
+        if (!m) return null;
+        m.email = u.email;
+        try { sessionStorage.setItem(ME, JSON.stringify(m)); } catch {}
+        return m;
+      })
+      .catch(() => null)
+      .finally(() => { meLoading = null; });
+    return meLoading;
+  }
+
+  let welcomed = false;
+  function showWelcome(m) {
+    const role = m.role === "super" || m.role === "manager" ? "admin" : m.role === "teacher" ? "teacher" : "guest";
+    const box = document.createElement("div");
+    box.className = "see-welcome " + role;
+    box.setAttribute("role", "status");
+    const icon = window.SEE?.icon || (() => "");
+    box.innerHTML = `<span class="sw-ico">${icon("hand")}</span><span class="sw-text"><b></b><small></small></span><button type="button" aria-label="인사 닫기">${icon("close")}</button>`;
+    box.querySelector("b").textContent = m.greet;
+    box.querySelector("small").textContent = m.hint || "";
+    document.body.appendChild(box);
+    const close = () => {
+      if (!box.isConnected || box.classList.contains("out")) return;
+      box.classList.add("out");
+      setTimeout(() => box.remove(), 350);
+    };
+    box.querySelector("button").addEventListener("click", close);
+    let timer = setTimeout(close, 7000);
+    // 읽는 동안(마우스·키보드 초점)은 닫지 않는다
+    box.addEventListener("mouseenter", () => clearTimeout(timer));
+    box.addEventListener("mouseleave", () => { clearTimeout(timer); timer = setTimeout(close, 3000); });
+    box.addEventListener("focusin", () => clearTimeout(timer));
+  }
+  async function maybeWelcome(u) {
+    let want = false;
+    try { want = sessionStorage.getItem(WELCOME) === "1"; } catch {}
+    if (!want || welcomed) return;
+    welcomed = true;
+    const m = await loadMe(u);
+    forget(WELCOME);
+    if (m?.greet) showWelcome(m);
+  }
 
   async function getConfig() {
     if (config) return config;
@@ -59,12 +122,17 @@
     const p = decode(resp.credential);
     if (!p) return;
     write({ token: resp.credential, exp: p.exp, name: p.name || p.email, email: p.email, picture: p.picture });
+    forget(ME);
+    try { sessionStorage.setItem(WELCOME, "1"); } catch {}
+    welcomed = false;
     window.dispatchEvent(new CustomEvent("see-auth", { detail: api.user() }));
     api.renderUtil();
   }
 
   let initialized = false;
   async function init() {
+    // 로그인 뒤 돌아올 화면(/api/google-callback이 읽는다) — 게시판에서 로그인하면 게시판으로
+    try { sessionStorage.setItem("see.next", /\.html$/.test(location.pathname) ? location.pathname : "/index.html"); } catch {}
     const c = await getConfig();
     if (!c.googleClientId) return false;
     await loadGis();
@@ -110,6 +178,7 @@
     },
     signOut() {
       write(null);
+      forget(ME, WELCOME);
       try { window.google?.accounts?.id?.disableAutoSelect(); } catch {}
       window.dispatchEvent(new CustomEvent("see-auth", { detail: null }));
       api.renderUtil();
@@ -120,8 +189,12 @@
       const u = read();
       const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       if (u) {
-        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="${esc(u.name)}님" title="${esc(u.name)}님 로그인 중" referrerpolicy="no-referrer">` : ""}<span>${esc(u.name)}님</span><button type="button" id="util-logout">로그아웃</button>`;
+        const me = readMe(u);
+        const call = me?.call || `${u.name}님`; // 관리자는 '박정교 장학사님', 현장교사 지원단은 '김하늘 선생님'
+        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="${esc(call)}" title="${esc(call)} 로그인 중" referrerpolicy="no-referrer">` : ""}<span>${esc(call)}</span><button type="button" id="util-logout">로그아웃</button>`;
         box.querySelector("#util-logout").addEventListener("click", api.signOut);
+        if (!me) loadMe(u).then((m) => m && read()?.email === m.email && api.renderUtil());
+        maybeWelcome(u);
       } else {
         box.innerHTML = `<a href="chat.html">AI 상담 로그인</a>`;
       }

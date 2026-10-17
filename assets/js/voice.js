@@ -47,6 +47,59 @@
     return r;
   }
 
+  /** 길게 말하기(게시판 '말로 남기기') — 말을 멈추고 silenceMs가 지나거나 stop()을 부르면 끝.
+      휴대폰처럼 인식이 중간에 끊기는 브라우저는 자동으로 다시 이어 듣는다.
+      onText(지금까지 말한 글), onEnd(최종 글, 오류 문구, 오류 코드). 처음 15초 동안 아무 말이 없으면 끝낸다 */
+  function listenLong({ onText, onEnd, silenceMs = 4000, maxMs = 300000 }) {
+    const begin = Date.now();
+    let done = "", heard = "", active = true, timer = 0, rec = null, err = "", code = "";
+    const finish = async () => {
+      if (!active) return;
+      active = false;
+      clearTimeout(timer);
+      try { rec?.stop(); } catch {}
+      const t = heard.trim();
+      if (!t && (code === "not-allowed" || code === "audio-capture")) err = (await micCause()) || err;
+      onEnd(t, t ? "" : err || LISTEN_ERR["no-speech"], t ? "" : code || "no-speech");
+    };
+    const arm = () => { clearTimeout(timer); timer = setTimeout(finish, heard.trim() ? silenceMs : 15000); };
+    const start = () => {
+      const r = (rec = new SR());
+      r.lang = "ko-KR";
+      r.interimResults = true;
+      r.continuous = true;
+      const base = done;
+      r.onresult = (e) => {
+        let fin = "", interim = "";
+        for (let i = 0; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) fin += t;
+          else interim += t;
+        }
+        done = (base + " " + fin).replace(/\s+/g, " ").trim();
+        heard = (done + " " + interim).replace(/\s+/g, " ").trim();
+        onText(heard);
+        arm();
+      };
+      r.onerror = (e) => {
+        if (e.error === "no-speech" || e.error === "aborted") return;
+        code = e.error;
+        err = LISTEN_ERR[e.error] || "음성을 알아듣지 못했어요. 다시 말씀해 주세요.";
+        if (["not-allowed", "service-not-allowed", "audio-capture", "network"].includes(e.error)) finish();
+      };
+      r.onend = () => {
+        if (!active) return;
+        done = heard; // 끊긴 순간까지 들은 말은 지키고 이어서 듣는다
+        if (Date.now() - begin > maxMs) return finish();
+        try { start(); } catch { finish(); }
+      };
+      r.start();
+    };
+    start(); // 반드시 누른 동작 안에서 바로 시작
+    arm();
+    return { stop: finish };
+  }
+
   /** 음성 인식은 문장부호를 거의 안 붙여서, 말끝을 보고 ? 또는 . 을 붙인다 */
   const Q_END = /(까|까요|니|냐|냐고|나요|가요|는가|던가|인가|건가|하나|되나|있나|없나|맞나|을래|ㄹ래|을래요|줄래|줄래요|래요|죠|지요|습니까|입니까|는지|은지|는지요|은지요|할지|일지|할지요|일지요|어때|어때요|어떤가요|되나요|있나요|없나요|수\s*있어|수\s*있어요|수\s*없어|수\s*없어요|수\s*있을까|수\s*있습니까)$/;
   const REQ_END = /(줘|줘요|주세요|주십시오|주셔요|해라|하세요|하십시오|보세요|봐|봐요|바랍니다|부탁해|부탁해요|부탁드립니다|드려요|알려|해 봐)$/;
@@ -244,8 +297,9 @@
     onDone?.(result);
   }
 
-  /** 마이크 버튼 연결 — 누르면 바로 듣기 시작, 다시 누르면 멈춤. 말이 끝나면 onFinal(문장부호 붙인 글) */
-  function bindMic(btn, field, onFinal) {
+  /** 마이크 버튼 연결 — 누르면 바로 듣기 시작, 다시 누르면 멈춤. 말이 끝나면 onFinal(문장부호 붙인 글)
+      opt.append: 입력칸에 있던 글 뒤에 이어 쓴다(게시판 내용 칸) */
+  function bindMic(btn, field, onFinal, opt = {}) {
     if (!btn) return false;
     if (!canListen) { btn.hidden = true; return false; }
     let rec = null;
@@ -262,13 +316,15 @@
       if (rec) { try { rec.stop(); } catch {} return; }
       stop();   // 읽어 주던 소리 멈춤(마이크가 그 소리를 듣지 않게)
       unlock(); // 이어서 답변을 읽어 줄 수 있게 소리 재생 권한을 미리 연다
+      const before = opt.append && field ? field.value.replace(/\s+$/, "") : "";
+      const join = (t) => (before ? before + " " + t : t);
       try {
         rec = listen({
-          onText: (t) => { if (field) field.value = t; },
+          onText: (t) => { if (field) field.value = join(t); },
           onEnd: (t, err, code) => {
             rec = null;
             ui(false);
-            if (t) return onFinal(punctuate(t));
+            if (t) return opt.append ? onFinal(join(punctuate(t))) : onFinal(punctuate(t));
             if (code === "not-allowed" || code === "service-not-allowed" || code === "audio-capture") showMicHelp(err);
             else if (err) SEE.toast(err);
           },
@@ -286,6 +342,6 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") stop(); });
 
   window.SEE = window.SEE || {};
-  window.SEE.voice = { canListen, listen, punctuate, bindMic, showMicHelp, speak, stop, unlock, canSpeak: !!(window.Audio || window.speechSynthesis) };
+  window.SEE.voice = { canListen, listen, listenLong, punctuate, bindMic, showMicHelp, speak, stop, unlock, canSpeak: !!(window.Audio || window.speechSynthesis) };
   window.addEventListener("pagehide", stop);
 })();

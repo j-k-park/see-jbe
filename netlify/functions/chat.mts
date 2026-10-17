@@ -15,7 +15,7 @@ type Inst = (typeof institutions.items)[number] & Record<string, unknown>;
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 const MAX_TURNS = 4;
 const REGIONS = institutions.regions as string[];
-const PAGES = ["step1", "step2", "step3", "step4", "step5", "library", "faq"] as const;
+const PAGES = ["step1", "step2", "step3", "step4", "step5", "library", "faq", "board"] as const;
 
 const TOOLS: Anthropic.Tool[] = [
   {
@@ -63,7 +63,7 @@ const TOOLS: Anthropic.Tool[] = [
   },
   {
     name: "open_page",
-    description: "누리집의 관련 페이지 바로가기 버튼을 답변 아래에 붙인다. step1 발달 정보, step2 선별검사, step3 결과별 가이드, step4 선정 절차·지원, step5 기관 찾기 지도, library 자료실, faq 자주 묻는 질문.",
+    description: "누리집의 관련 페이지 바로가기 버튼을 답변 아래에 붙인다. step1 발달 정보, step2 선별검사, step3 결과별 가이드, step4 선정 절차·지원, step5 기관 찾기 지도, library 자료실, faq 자주 묻는 질문, board 담당자와 소통(담당자에게 직접 묻는 게시판).",
     input_schema: {
       type: "object",
       properties: {

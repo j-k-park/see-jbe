@@ -1,6 +1,8 @@
 /* 구글 로그인 리디렉션 방식의 돌아오는 주소 (POST /api/google-callback)
    팝업을 막는 브라우저(앱 속 브라우저 등)에서도 로그인되도록, 구글이 ID 토큰을 이 주소로 보내면
-   서명을 검증한 뒤 브라우저 탭(sessionStorage)에 저장하고 상담 화면으로 돌려보낸다. 서버에는 저장하지 않는다. */
+   서명을 검증한 뒤 브라우저 탭(sessionStorage)에 저장하고 로그인을 시작한 화면(see.next, 없으면 상담 화면)으로 돌려보낸다.
+   돌아간 화면은 환영 인사('현장교사 지원단 김하늘 선생님 반갑습니다')를 한 번 띄운다.
+   서버에는 저장하지 않는다. */
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { Config } from "@netlify/functions";
 
@@ -12,8 +14,11 @@ const page = (script: string) =>
     { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } }
   );
 
+// 로그인을 시작한 화면으로(assets/js/auth.js가 sessionStorage see.next에 적어 둔 이 누리집의 .html 주소만)
+const GO = `var n="/chat.html";try{var s=sessionStorage.getItem("see.next")||"";sessionStorage.removeItem("see.next");if(s.charAt(0)==="/"&&s.indexOf("//")<0&&s.slice(-5)===".html")n=s;}catch(e){}location.replace(n);`;
+
 const back = (msg?: string) =>
-  page(`${msg ? `alert(${JSON.stringify(msg).replace(/</g, "\\u003c")});` : ""}location.replace("/chat.html");`);
+  page(`${msg ? `alert(${JSON.stringify(msg).replace(/</g, "\\u003c")});` : ""}${GO}`);
 
 function cookie(req: Request, name: string) {
   const m = (req.headers.get("cookie") || "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
@@ -49,7 +54,8 @@ export default async (req: Request) => {
       picture: (payload.picture as string) || "",
     };
     const json = JSON.stringify(session).replace(/</g, "\\u003c");
-    return page(`try{sessionStorage.setItem("see.auth",${JSON.stringify(json)});}catch(e){}location.replace("/chat.html");`);
+    // see.welcome: 돌아간 화면에서 환영 인사를 한 번 띄운다(assets/js/auth.js) · see.me: 이전 계정의 이름 기억은 지운다
+    return page(`try{sessionStorage.setItem("see.auth",${JSON.stringify(json)});sessionStorage.setItem("see.welcome","1");sessionStorage.removeItem("see.me");}catch(e){}${GO}`);
   } catch {
     return back("로그인을 확인하지 못했습니다. 다시 시도해 주세요.");
   }

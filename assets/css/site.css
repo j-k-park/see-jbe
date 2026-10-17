@@ -88,7 +88,8 @@ ul, ol { margin: 0; padding: 0; }
 .gnb a .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; color: #fff; background: var(--c, var(--navy)); }
 .gnb a:hover, .gnb a[aria-current="page"] { border-bottom-color: var(--c, var(--navy)); }
 /* '담당자와 소통' 메뉴는 연한 연두 바탕으로 눈에 띄게 */
-.gnb a.gnb-talk { align-self: center; margin-left: 4px; padding: 8px 16px; border-radius: 999px; background: #e3f5c8; color: #2f5d12; border: 1px solid #c6e59a; }
+.gnb li:has(> .gnb-talk) { display: flex; align-items: center; }
+.gnb a.gnb-talk { margin-left: 4px; padding: 4px 12px; font-size: 15px; border-radius: 999px; background: #e3f5c8; color: #2f5d12; border: 1px solid #c6e59a; }
 .gnb a.gnb-talk:hover, .gnb a.gnb-talk[aria-current="page"] { background: #d3eeac; border-color: #9fd164; }
 
 /* ---------- 공통 요소 ---------- */

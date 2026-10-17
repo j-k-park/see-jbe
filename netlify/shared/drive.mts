@@ -74,7 +74,8 @@ async function decrypt(blob: string) {
 
 /* ---------- OAuth ---------- */
 export function oauthClient() {
-  const id = Netlify.env.get("GOOGLE_CLIENT_ID"), sec = Netlify.env.get("GOOGLE_CLIENT_SECRET");
+  // 복사·붙여넣기로 들어간 앞뒤 빈칸·줄바꿈은 지운다
+  const id = Netlify.env.get("GOOGLE_CLIENT_ID")?.trim(), sec = Netlify.env.get("GOOGLE_CLIENT_SECRET")?.trim();
   if (!id || !sec) throw new DriveError(503, "구글 드라이브 연결 설정(GOOGLE_CLIENT_SECRET)이 아직 준비되지 않았어요.");
   return { id, secret: sec };
 }

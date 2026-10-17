@@ -39,8 +39,10 @@
         <div class="b-admin-head"><span class="tag navy">관리자 메뉴</span><h2>저장소 · 구글 드라이브</h2></div>
         <p class="b-admin-state" id="b-drive-state">확인하는 중…</p>
         <div class="b-admin-acts" id="b-drive-acts"></div>
-        <div class="b-roles" id="b-roles">
-          <div class="b-admin-head"><h2>관리자와 현장교사 지원단</h2><span class="b-role-help">최고관리자·협력관리자는 같은 권한(모든 권한) · 현장교사 지원단은 비밀글을 포함한 모든 글의 답변·고치기와 공지 쓰기</span></div>
+        <!-- 노션 토글처럼 눌러서 펼치고 접는다(펼침 상태는 이 브라우저에 기억) -->
+        <details class="b-roles" id="b-roles">
+          <summary class="b-roles-sum"><span class="b-tog" aria-hidden="true"></span><h2>관리자와 현장교사 지원단</h2><span class="b-roles-count" id="b-roles-count"></span></summary>
+          <p class="b-role-help">최고관리자·협력관리자는 같은 권한(모든 권한) · 현장교사 지원단은 비밀글을 포함한 모든 글의 답변·고치기와 공지 쓰기</p>
           <p class="b-role-note">최고·협력관리자로 지정한 분께는 구글 드라이브의 거점 폴더('유아특수 웹앱')도 '편집자'로 공유해 주세요. 그래야 드라이브에서도 자료를 고치고 지울 수 있어요. 역할을 뺄 때는 공유도 함께 거둬 주세요.</p>
           <form class="b-role-add" id="b-role-add">
             <label class="sr-only" for="br-email">구글 계정(이메일)</label><input id="br-email" type="email" placeholder="구글 계정 이메일" autocomplete="off" required>
@@ -50,7 +52,7 @@
           </form>
           <ul class="b-members" id="b-members"></ul>
           <div class="b-apps" id="b-apps"></div>
-        </div>
+        </details>
       </div>
 
       <!-- 로그인 안내 -->

@@ -453,7 +453,13 @@
   }
   /* 관리자와 현장교사 지원단 지정(최고·협력관리자는 같은 권한: 모든 역할 지정·빼기, 이름 고치기) */
   const canManage = () => !!me?.admin;
+  // 토글 펼침 상태 기억(노션처럼)
+  const ROLES_OPEN = "see.board.rolesOpen";
+  try { $("b-roles").open = localStorage.getItem(ROLES_OPEN) === "1"; } catch {}
+  $("b-roles").addEventListener("toggle", () => { try { localStorage.setItem(ROLES_OPEN, $("b-roles").open ? "1" : "0"); } catch {} });
   function drawMembers(r) {
+    // 접혀 있어도 몇 명인지, 기다리는 신청이 있는지 보이게
+    $("b-roles-count").innerHTML = `${r.members.length}명` + (r.applications.length ? ` · <b>신청 ${r.applications.length}건 기다리는 중</b>` : "");
     // 이름에는 직함이 붙어 보인다(이영미 장학사 · 김하늘 선생님). 기본 최고관리자는 이름만 고칠 수 있다
     $("b-members").innerHTML = r.members.map((m) => {
       const canName = canManage();

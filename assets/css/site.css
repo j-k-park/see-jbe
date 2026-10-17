@@ -643,7 +643,16 @@ dialog.b-viewer[open] { display: flex; flex-direction: column; }
 .b-edited { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink-3); }
 .b-edited svg { width: 13px; height: 13px; }
 .b-edit { display: grid; gap: 8px; }
-.b-roles { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 4px; display: grid; gap: 10px; }
+.b-roles { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+.b-roles[open] > :not(summary) { margin-top: 10px; }
+.b-roles-sum { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; padding: 4px 6px; margin: 0 -6px; border-radius: 8px; user-select: none; }
+.b-roles-sum::-webkit-details-marker { display: none; }
+.b-roles-sum:hover { background: var(--bg-2); }
+.b-roles-sum h2 { font-size: 18px; color: var(--navy); }
+.b-tog { width: 0; height: 0; border-left: 7px solid var(--ink-3); border-top: 5px solid transparent; border-bottom: 5px solid transparent; transition: transform .15s; flex: none; }
+.b-roles[open] .b-tog { transform: rotate(90deg); }
+.b-roles-count { font-size: 13px; color: var(--ink-3); }
+.b-roles-count b { color: #c45a00; }
 .b-roles[hidden] { display: none; }
 .b-role-help { font-size: 13px; color: var(--ink-3); }
 .b-role-note { margin: 2px 0 10px; padding: 8px 12px; border-radius: 10px; background: var(--yellow-soft); color: #5c4a00; font-size: 13px; line-height: 1.55; }

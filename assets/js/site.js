@@ -88,7 +88,7 @@
           </a>
           <div class="mast-actions">
             <a class="btn-ai" href="chat.html">${icon("chat")}<span>AI 상담 SEE</span></a>
-            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="gnb" aria-label="메뉴 열기">${icon("menu")}</button>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="gnb">메뉴</button>
           </div>
         </div>
         <nav class="gnb" id="gnb" aria-label="주 메뉴"><div class="wrap"><ul>
@@ -103,7 +103,7 @@
       t.addEventListener("click", () => {
         const open = g.classList.toggle("open");
         t.setAttribute("aria-expanded", String(open));
-        t.innerHTML = icon(open ? "close" : "menu");
+        t.textContent = open ? "닫기" : "메뉴";
       });
     }
     const foot = document.getElementById("site-foot");

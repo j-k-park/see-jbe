@@ -79,7 +79,9 @@ ul, ol { margin: 0; padding: 0; }
 .btn-ai { display: inline-flex; align-items: center; gap: 8px; background: var(--navy); color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 15px; border: 0; }
 .btn-ai:hover { background: var(--navy-2); }
 .btn-ai svg { width: 18px; height: 18px; }
-.menu-toggle { display: none; background: #fff; border: 1px solid var(--line); border-radius: 10px; width: 44px; height: 44px; align-items: center; justify-content: center; }
+/* 휴대폰 메뉴 단추: 줄 세 개 대신 글자 '메뉴' + 연한 연두 바탕 */
+.menu-toggle { display: none; background: #e3f5c8; color: #2f5d12; border: 1px solid #c6e59a; border-radius: 999px; min-width: 64px; height: 44px; padding: 0 16px; align-items: center; justify-content: center; font: inherit; font-size: 15px; font-weight: 800; }
+.menu-toggle[aria-expanded="true"] { background: #d3eeac; border-color: #9fd164; }
 .menu-toggle svg { width: 22px; height: 22px; }
 
 .gnb { border-top: 1px solid var(--line-2); }
@@ -253,6 +255,18 @@ html.mo-still .twinkle { animation: none; opacity: .8; }
 .quick a:hover { border-color: var(--navy); }
 .quick .ico { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--bg, var(--blue-soft)); color: var(--fg, var(--blue)); }
 .quick .ico svg { width: 26px; height: 26px; }
+/* 마지막 칸을 위아래로 나눈 AI 상담 · 담당자와 소통 */
+.quick-split { display: grid; grid-template-rows: 1fr 1fr; gap: 6px; }
+.quick-split a { flex-direction: row; justify-content: center; gap: 8px; padding: 8px 6px; font-size: 14.5px; word-break: keep-all; }
+.quick-split .ico { width: 34px; height: 34px; flex: none; }
+.quick-split .ico svg { width: 18px; height: 18px; }
+.quick-split a.talk { background: #f4fbe9; border-color: #d4ebb4; }
+@media (max-width: 560px) {
+  /* 휴대폰에서는 칸이 좁아 아이콘을 작게, 글자는 가운데로 */
+  .quick-split a { flex-direction: column; gap: 3px; padding: 6px 4px; font-size: 13.5px; line-height: 1.25; }
+  .quick-split .ico { width: 26px; height: 26px; }
+  .quick-split .ico svg { width: 15px; height: 15px; }
+}
 
 .journey { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; counter-reset: j; }
 .journey a { position: relative; display: flex; flex-direction: column; gap: 10px; text-decoration: none; background: #fff; border: 1px solid var(--line); border-top: 6px solid var(--c); border-radius: var(--radius); padding: 22px 18px 20px; min-height: 250px; }

@@ -196,7 +196,7 @@
         if (!me) loadMe(u).then((m) => m && read()?.email === m.email && api.renderUtil());
         maybeWelcome(u);
       } else {
-        box.innerHTML = `<a href="chat.html">AI 상담 로그인</a>`;
+        box.innerHTML = `<a href="chat.html">AI 상담 및 담당자와 소통 로그인</a>`;
       }
     },
   };

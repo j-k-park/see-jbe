@@ -15,6 +15,7 @@
   let pick = "";     // 목록에서 고른 모델
   let dev = false;   // 로컬 미리보기
   let busy = false;
+  let scrolled = false; // #admin-menu 로 들어왔을 때 한 번만 내려가기
 
   async function call(method, body, qs = "") {
     const tk = auth?.token?.();
@@ -147,6 +148,11 @@
     try {
       v = await call("GET", null, refresh ? "?refresh=1" : "");
       render();
+      // 위쪽 '관리자 메뉴' 단추(board.html#admin-menu)로 들어오면, 관리자 칸이 보인 뒤 그 자리로 내려간다
+      if (location.hash === "#admin-menu" && !scrolled) {
+        scrolled = true;
+        setTimeout(() => $("admin-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      }
     } catch (e) {
       if (e.status === 401 || e.status === 403) { box.hidden = true; return; }
       box.hidden = false;

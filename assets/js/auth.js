@@ -191,7 +191,7 @@
       if (u) {
         const me = readMe(u);
         const call = me?.call || `${u.name}님`; // 관리자는 '박정교 장학사님', 현장교사 지원단은 '김하늘 선생님'
-        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="${esc(call)}" title="${esc(call)} 로그인 중" referrerpolicy="no-referrer">` : ""}<span>${esc(call)}</span><button type="button" id="util-logout">로그아웃</button>`;
+        box.innerHTML = `${u.picture ? `<img src="${esc(u.picture)}" alt="${esc(call)}" title="${esc(call)} 로그인 중" referrerpolicy="no-referrer">` : ""}<span>${esc(call)}</span>${me && (me.role === "super" || me.role === "manager") ? `<a class="util-admin" href="board.html#admin-menu">관리자 메뉴</a>` : ""}<button type="button" id="util-logout">로그아웃</button>`;
         box.querySelector("#util-logout").addEventListener("click", api.signOut);
         if (!me) loadMe(u).then((m) => m && read()?.email === m.email && api.renderUtil());
         maybeWelcome(u);

@@ -63,6 +63,9 @@ ul, ol { margin: 0; padding: 0; }
 .util a:hover { opacity: 1; text-decoration: underline; }
 .util-links { display: flex; gap: 16px; flex-wrap: wrap; }
 .util-user { display: flex; align-items: center; gap: 8px; }
+.util-user a.util-admin { background: var(--yellow); color: var(--navy); font-weight: 800; border-radius: 999px; padding: 2px 10px; opacity: 1; text-decoration: none; white-space: nowrap; }
+.util-user a.util-admin:hover { text-decoration: none; filter: brightness(1.05); }
+#admin-menu { display: block; scroll-margin-top: 90px; }
 .util-user img { width: 22px; height: 22px; border-radius: 50%; }
 .util-user button { background: transparent; border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 999px; padding: 2px 10px; font-size: 12px; }
 

@@ -55,6 +55,43 @@
         </details>
       </div>
 
+      <!-- 관리자 메뉴: AI 상담 연결(BAZE) — 열쇠·사용 모델·남은 크레딧 (assets/js/aiadmin.js · netlify/functions/ai-admin.mts) -->
+      <div class="card b-admin" id="ai-admin" hidden>
+        <div class="b-admin-head"><span class="tag navy">관리자 메뉴</span><h2>AI 상담 연결 · BAZE</h2></div>
+        <div class="ai-now" id="ai-now" aria-live="polite">확인하는 중…</div>
+
+        <details class="b-roles" id="ai-key-box">
+          <summary class="b-roles-sum"><span class="b-tog" aria-hidden="true"></span><h2>BAZE 열쇠</h2><span class="b-roles-count" id="ai-key-sum"></span></summary>
+          <p class="b-role-help">열쇠는 BAZE 화면 왼쪽 아래 <b>API Gateway</b>에서 만들어요. 저장하기 전에 BAZE에 물어 통하는 열쇠인지 확인하고, 암호문으로 보관해요. 화면에는 끝 네 글자만 보여요.</p>
+          <form class="b-role-add ai-key-form" id="ai-key-form" autocomplete="off">
+            <label class="sr-only" for="ai-key">새 BAZE 열쇠</label>
+            <input id="ai-key" type="password" placeholder="새 열쇠 붙여넣기 (baze_…)" autocomplete="new-password" spellcheck="false" required>
+            <button type="submit" class="btn btn-navy btn-sm" id="ai-key-save">열쇠 저장</button>
+            <button type="button" class="btn btn-line btn-sm" id="ai-key-forget" hidden>저장한 열쇠 지우기</button>
+          </form>
+        </details>
+
+        <details class="b-roles" id="ai-model-box">
+          <summary class="b-roles-sum"><span class="b-tog" aria-hidden="true"></span><h2>사용 모델</h2><span class="b-roles-count" id="ai-model-sum"></span></summary>
+          <p class="b-role-help">BAZE가 제공하는 대화 모델이에요. 고른 모델은 <b>AI 상담 SEE</b>와 게시판 <b>말로 남기기 정리</b>에 함께 쓰여요. 바꾸기 전에 <b>이 모델로 시험</b>으로 답변을 먼저 확인해 주세요.</p>
+          <div class="ai-bar">
+            <label class="sr-only" for="ai-filter">모델 이름으로 찾기</label>
+            <input id="ai-filter" type="search" placeholder="모델 이름으로 찾기 (예: haiku, gpt, gemini)">
+            <button type="button" class="btn btn-line btn-sm" id="ai-refresh">목록 새로 받기</button>
+          </div>
+          <p class="ai-note" id="ai-note" hidden></p>
+          <div class="ai-models" id="ai-models"></div>
+          <div class="ai-pick" id="ai-pick" hidden>
+            <p id="ai-pick-msg"></p>
+            <div class="ai-pick-acts">
+              <button type="button" class="btn btn-line btn-sm" id="ai-test">이 모델로 시험</button>
+              <button type="button" class="btn btn-navy btn-sm" id="ai-apply">이 모델로 바꾸기</button>
+            </div>
+          </div>
+          <div class="ai-test" id="ai-test-out" hidden aria-live="polite"></div>
+        </details>
+      </div>
+
       <!-- 로그인 안내 -->
       <div class="card b-login" id="b-login" hidden>
         <h2>로그인하고 의견을 남겨 주세요</h2>
@@ -174,6 +211,7 @@
 <script src="assets/js/site.js"></script>
 <script src="assets/js/art.js"></script>
 <script src="assets/js/voice.js"></script>
+<script src="assets/js/aiadmin.js"></script>
 <script src="assets/js/board.js"></script>
 </body>
 </html>

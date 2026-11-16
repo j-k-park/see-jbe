@@ -23,6 +23,10 @@
 | `GATEWAY_PROMPT_CACHE` | (선택) `off`면 프롬프트 캐싱 미사용 — 캐싱을 지원하지 않는 중계·모델용 |
 | `GATEWAY_TOOL_CHOICE_NONE` | (선택) `off`면 마지막 턴의 `tool_choice: none`을 보내지 않음 |
 | `GATEWAY_OFF` | (선택) `true`면 게이트웨이 설정을 남겨 둔 채 Anthropic 직접 연결만 사용 |
+| `BAZE_ROOT` | (선택) 관리자 화면에서 저장한 BAZE 열쇠를 쓸 게이트웨이 주소, 기본 `https://api.baze.co/v1/gateway` |
+| `DATA_KEY` | (선택, 비밀값) 관리자 화면에서 저장한 BAZE 열쇠를 잠글 비밀값. 없으면 `GOOGLE_CLIENT_SECRET`으로 잠근다(바꾸면 열쇠를 다시 저장) |
+
+**관리자 화면에서 바꾸기**: '담당자와 소통' → 관리자 메뉴 → **AI 상담 연결 · BAZE**에서 BAZE 열쇠 저장(암호문, 끝 네 글자만 표시)·BAZE 모델 목록에서 사용 모델 고르기·시험·남은 크레딧 확인. 화면에서 저장한 열쇠와 모델이 환경변수보다 먼저 쓰인다. Claude가 아닌 모델(GPT·Gemini 등)은 BAZE의 OpenAI 형식으로 부른다(`netlify/shared/oai.mts`).
 | `DAILY_LIMIT` | 계정당 하루 질문 수, 기본 30 |
 | `DAILY_TOTAL_LIMIT` | 전체 하루 질문 수 상한, 기본 2000 |
 

@@ -18,10 +18,9 @@
    첨부는 공개글이어도 작성자와 담당자만 볼 수 있다(담당자에게 '제출'). 이름은 본인·담당자가 아닌 사람에게 가려서(박*교) 보인다.
    역할(netlify/shared/user.mts): 담당자(최고·협력관리자·현장교사 지원단) = 비밀글·첨부 보기와 답변, 모든 글·댓글 고치기, 공지 쓰기
    / 최고·협력관리자만 = 남의 글·댓글·첨부 지우기, 이름 전체 보기, 드라이브 바로가기 */
-import Anthropic from "@anthropic-ai/sdk";
 import { getStore } from "@netlify/blobs";
 import type { Config } from "@netlify/functions";
-import { aiRoutes } from "../shared/ai.mts";
+import { aiRoutes, completeText, errorBrief } from "../shared/ai.mts";
 import { getUser, titled, callName, type User, type Role } from "../shared/user.mts";
 import { DriveError, driveCfg, ensureRoot, ensureFolder, createFolder, createUploadSession, putText, trash, download, thumbnail, driveApi } from "../shared/drive.mts";
 
@@ -281,23 +280,22 @@ function parseDraft(out: string, src: string) {
 }
 
 async function makeDraft(speech: string, notice = false) {
-  const routes = aiRoutes();
+  const routes = await aiRoutes();
   if (!routes.length) throw Object.assign(new Error("no-ai"), { status: 503 });
   let last: unknown;
   for (const route of routes) {
     try {
-      const client = new Anthropic({ apiKey: route.apiKey, baseURL: route.baseURL, maxRetries: 1, timeout: 45_000 });
-      const res = await client.messages.create({
-        model: route.model,
+      // 게이트웨이(관리자가 고른 모델) → 실패하면 Anthropic 직접 연결
+      const { text: out } = await completeText(route, {
         max_tokens: 2000,
         system: notice ? NOTICE_SYSTEM : DRAFT_SYSTEM,
         messages: [{ role: "user", content: `<말한_내용>\n${speech}\n</말한_내용>` }],
-      });
-      const out = res.content.map((b) => (b.type === "text" ? b.text : "")).join("");
+      }, 45_000);
+      if (!out.trim()) throw new Error("빈 답변");
       return parseDraft(out, speech);
     } catch (e) {
       last = e;
-      console.warn(`[board draft ${route.label}] 실패`, e instanceof Anthropic.APIError ? `${e.status} ${e.message}` : e);
+      console.warn(`[board draft ${route.label} ${route.model}] 실패`, errorBrief(e));
     }
   }
   throw last;

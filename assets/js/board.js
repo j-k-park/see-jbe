@@ -108,6 +108,7 @@
       $("b-notice").hidden = !me?.staff;
       if (me?.admin) { driveStatus(); rolesLoad(); }
       else $("drive").hidden = true;
+      SEE.aiAdmin?.sync(!!me?.admin); // 관리자 메뉴 'AI 상담 연결 · BAZE'(assets/js/aiadmin.js)
       applyLoad();
     } catch (e) {
       $("b-list").innerHTML = `<li class="b-wait">${esc(e.message)}</li>`;

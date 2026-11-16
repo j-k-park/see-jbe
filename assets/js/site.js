@@ -76,6 +76,7 @@
           <a href="https://www.jbe.go.kr/" target="_blank" rel="noopener">전북특별자치도교육청</a>
           <a href="https://www.jbe.go.kr/special/" target="_blank" rel="noopener">특수교육지원센터</a>
           <a href="https://www.nise.go.kr/onmam/front/index.do" target="_blank" rel="noopener">장애자녀 부모지원(온맘)</a>
+          <a href="https://ai.jbe.go.kr/auth" target="_blank" rel="noopener">전북AIEP(전북AI)</a>
         </div>
         <div class="util-user" id="util-user"></div>
       </div></div>
